@@ -1,0 +1,2 @@
+(?P<mid_word>)
+number of words : 0

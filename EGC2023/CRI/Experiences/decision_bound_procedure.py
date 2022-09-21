@@ -1,6 +1,16 @@
 import re
 import os
 import matplotlib.pyplot as plt
+import argparse
+
+
+parser = argparse.ArgumentParser(
+    description="evaluates all of the articles \
+    in the Corpus and prints the results")
+parser.add_argument("-m", "--mode",
+                    help="chosen mode",
+                    choices=["CRI", "TAXREF"])
+args = parser.parse_args()
 
 
 def compute_volume():
@@ -49,7 +59,10 @@ def find_bound():
     c = r"recall = (?P<r>\d+\.\d+) %.*"
     d = r"F-measure = (?P<fm>\d+\.\d+)"
     results = re.compile(a+b+c+d, flags=re.DOTALL)
-    cmd = "python3 Experiences/score_corpus.py -o tmp"
+    if args.mode == "CRI":
+        cmd = "python3 Experiences/score_corpus.py -o tmp"
+    elif args.mode == "TAXREF":
+        cmd = "python3 Experiences/score_corpus.py -o tmp -m 7abs3"
     best_prec = (.0, "0")
     best_rec = (.0, "0")
     best_fm = (.0, "0")
