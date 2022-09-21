@@ -60,9 +60,10 @@ def find_bound():
     d = r"F-measure = (?P<fm>\d+\.\d+)"
     results = re.compile(a+b+c+d, flags=re.DOTALL)
     if args.mode == "CRI":
-        cmd = "python3 Experiences/score_corpus.py -o tmp"
+        mode = "3"
     elif args.mode == "TAXREF":
-        cmd = "python3 Experiences/score_corpus.py -o tmp -m 7abs3"
+        mode = "7abs3"
+    cmd = f"python3 Experiences/score_corpus.py -o tmp -m {mode} -vs calibration"
     best_prec = (.0, "0")
     best_rec = (.0, "0")
     best_fm = (.0, "0")

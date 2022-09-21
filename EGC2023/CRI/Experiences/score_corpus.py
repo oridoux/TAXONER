@@ -36,6 +36,9 @@ parser.add_argument("-r", "--regex", help=ex.help_regex,
                     default=ex.default_regex)
 parser.add_argument("-s", "--stopwords",
                     help=ex.help_stopwords, default=ex.stopwords_path)
+parser.add_argument("-vs", "--volumeSelection", default="all",
+                    help="the volume selection that will be used",
+                    choices=["all", "calibration", "test"])
 args = parser.parse_args()
 
 # format for the date of when the experience was carried
@@ -54,7 +57,7 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
     nfps = nfns = ntps = 0
     with os.scandir(corpus) as it:
         count = len([entry for entry in it if entry.is_file()])
-    bar = Bar('Processing ' + corpus.name, fill='#', max=count)
+    bar = Bar('Processing ' + corpus, fill='#', max=count)
     with os.scandir(corpus) as it:
         for entry in it:
             if entry.is_file():
@@ -101,23 +104,29 @@ if __name__ == "__main__":
                 126: vol126.expected, 155: vol155.expected}
     results = f"# {li}\nExperience launched on {daytime} with mode {args.mode}\n{li}\n"
     nfps = nfns = ntps = 0
-    with os.scandir(args.Corpus) as it:
-        for entry in it:
-            if entry.is_dir():
-                if args.Verbose:
-                    results += f"## starting evaluation of volume {entry.name}\n"
-                vol_num = int(re.search(r"\d+", entry.name).group(0))
-                (result, fps, fns, tps) = evaluation(
-                    entry, expected[vol_num], args.Classifier, args.mode,
-                    args.regex, stopwords)
-                results += result
-                ntps += tps
-                nfps += fps
-                nfns += fns
-        precision, recall, fm = ex.score(nfps, nfns, ntps)
-        prec = "{:.2f}".format(precision*100)
-        rec = "{:.2f}".format(recall*100)
-        fmes = "{:.2f}".format(fm*100)
-        results += f"## overall scores on the whole corpus:\n\tprecision = {prec} %\n"
-        results += f"\trecall = {rec} %\n\tF-measure = {fmes} %\n"
-ex.print_res(args.output, results)
+    entries = os.listdir(args.Corpus)
+    if args.volumeSelection == "test":
+        entries.remove('vol12')
+        entries.remove('vol126')
+    elif args.volumeSelection == "calibration":
+        entries.remove('vol155')
+        entries.remove('vol83')
+    for entry in entries:
+        if args.Verbose:
+            results += f"## starting evaluation of volume {entry}\n"
+        vol_num = int(re.search(r"\d+", entry).group(0))
+        (result, fps, fns, tps) = evaluation(
+            os.path.join(
+                args.Corpus, entry), expected[vol_num], args.Classifier, args.mode,
+            args.regex, stopwords)
+        results += result
+        ntps += tps
+        nfps += fps
+        nfns += fns
+    precision, recall, fm = ex.score(nfps, nfns, ntps)
+    prec = "{:.2f}".format(precision*100)
+    rec = "{:.2f}".format(recall*100)
+    fmes = "{:.2f}".format(fm*100)
+    results += f"## overall scores on the whole corpus:\n\tprecision = {prec} %\n"
+    results += f"\trecall = {rec} %\n\tF-measure = {fmes} %\n"
+    ex.print_res(args.output, results)
