@@ -16,13 +16,15 @@ class SmartFormatter(argparse.HelpFormatter):
         # this is the RawTextHelpFormatter._split_lines
         return argparse.HelpFormatter._split_lines(self, text, width)
 
+########################### LATIN BASED CLASSIFIER #####################################
 
 lower_case = r"[a-zæœ-]"
 upper_case = r"[A-ZŒÆ]"
-a_case = f"({lower_case}|{upper_case})"
-acword = a_case + lower_case + "+"
+any_case = f"({lower_case}|{upper_case})"
+acword = any_case + lower_case + "+"
 lcword = lower_case + "+"
 ucword = upper_case + lcword
+
 # leave the possibility for a subgenus
 # binom = ucword + r"\s([\(\[{]" + acword + r"[\)\]}]\s)?" + lcword
 # lbinom = lcword + r"\s([\(\[{]" + acword + r"[\)\]}]\s)?" + lcword
@@ -33,6 +35,9 @@ ucword = upper_case + lcword
 # binombutstop = "(?!" + stopwords + ")" + ucword + \
 #                  "(?!" + stopwords + ")" + r"\s" + lcword
 
+# Latin declension tables
+
+# relaxed
 
 def tables_relachee():
     nom_nominatif = [("us", 'M'), ("us", 'F'), ("a", 'F'), ("ma", 'N'),
@@ -57,6 +62,7 @@ def tables_relachee():
                      ("oides", 'N')]
     return (nom_nominatif, nom_genitif, adj_nominatif)
 
+# strict
 
 def tables_restreintes():
     nom_nominatif = [("us", 'M'), ("us", 'F'), ("a", 'F'), ("ma", 'N'),
@@ -88,6 +94,8 @@ def tables_restreintes():
 # (with upper_case letters at arbitrary positions) in latin form
 # according to the tables inputed
 def get_latin_expr(tables, case_genus, case_species):
+    before_latin_build = time.time()
+        
     nom_nominatif, nom_genitif, adj_nominatif = tables
     latin_binom = r""
     # leave the possibility of a subgenus in parentheses
@@ -106,84 +114,13 @@ def get_latin_expr(tables, case_genus, case_species):
             if g == gp:
                 species_names = mid + tp
                 latin_binom += f"({genre_name}{species_names})|"
+
+    after_latin_build = time.time()
+    latin_build_time_min = (after_latin_build - before_latin_build)/60
+    print(f"{latin_build_time_min = }")
+
     # remplacer le dernier | par la parenthèse qui ferme le groupe
     return latin_binom[:-1]
-
-taxref_dir = "../.."
-
-def is_article(s):
-    return s in {"du", "Du", "le", "Le", "d"}
-
-def etacnurt( word, width ): # truncate starting from the end
-    return (word if len(word) <= width else ("@" + word[-width:]))
-
-def regex_of_spe(spe):
-    return (re.sub(r"@", "[ÆŒA-Z][éèêæœüöa-z]*(-[éèêæœüöa-z])?", spe) if (spe[-1] == "i" or spe[-3:-1] == "sis")
-           else re.sub(r"@", "[éèêæœüöa-z]+(-[éèêæœüöa-z])?", spe))
-
-def regex_of_gen(gen):
-    return re.sub(r"@", "[ÆŒA-Z][éèêæœüöa-z]*", gen)
-
-# returns a regex that matches binoms of the TAXREF base
-def get_taxref_expr(taxref_style="7abs3"):
-    before_taxref_build = time.time()
-            
-    abs_width = 100 if taxref_style == "accurate" else int(taxref_style[4])     # ex. 7absN
-
-    taxref = open(f"{taxref_dir}/taxref.out").read()
-    taxref_raw_lines = re.split(r'\n', re.sub(r"\[.*\]|\(.*\)|\?|\"", "", taxref))
-    # print(f"{taxref_raw_lines = }")
-    taxref_gen_spe = []
-    taxref_dic = {}
-    for line in taxref_raw_lines:
-        # print(f"{line = }")
-        if line == "": continue
-        if line[0] == "+": continue
-        if " x " in line: continue
-        if not " " in line: continue
-        line_split = re.split(r' +', line)
-        gen = line_split[0] ; spe = line_split[1]
-        if gen == "" : continue
-        if spe == "" : continue
-        if is_article(spe):
-            if len(line_split) > 2: spe = " ".join([spe, line_split[2]]) 
-            else: continue
-
-        g = gen[0] + r"\."
-        spe_suff = etacnurt(spe, abs_width)
-        gen_suff = etacnurt(gen, abs_width)
-        if g not in taxref_dic:
-            taxref_dic[g] = {spe_suff}
-        elif spe_suff not in taxref_dic[g]:
-            taxref_dic[g].add(spe_suff)
-        if gen_suff not in taxref_dic:
-            taxref_dic[gen_suff] = {spe_suff}
-        elif spe_suff not in taxref_dic[gen_suff]:
-            taxref_dic[gen_suff].add(spe_suff)
-
-    # print(f"{taxref_dic = }")
-
-    print(f"taxref_dic size ({taxref_style}) = {len(taxref_dic)}")
-    print(f"taxref_dic # species / gen = {sum([len(taxref_dic[gen]) for gen in taxref_dic]) / len(taxref_dic)}")
-
-    spe_sum = ( lambda gen: ( ("" if len(taxref_dic[gen]) == 1 else "(") 
-                            + "|".join(map( (lambda s: regex_of_spe(s)), taxref_dic[gen])) 
-                            + ("" if len(taxref_dic[gen]) == 1 else ")") ) )
-
-    taxref_expr = "(?!(nous|Nous|Plus|Mais|\w+tion|(\w+|[A-Z]\.) (\w+tion|\w+tions|\w+enne|\w+ennes|\w+elle|\w+elles|dans|nous|sous|sans|plus|sera|vers|puis)))(" + "|".join([f"({regex_of_gen(gen)} {spe_sum(gen)})" for gen in taxref_dic]) + ")"        
-    # print(f"{taxref_expr = }")
-    after_taxref_build = time.time()
-    taxref_build_time_min = (after_taxref_build - before_taxref_build)/60
-    print(f"{taxref_build_time_min = }")
-    return taxref_expr
-
-def compile_taxref(taxref_expr):
-    before_taxref_compile = time.time()
-    matcher = re.compile(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
-    after_taxref_compile = time.time()
-    taxref_compile_time_min = (after_taxref_compile - before_taxref_compile)/60
-    print(f"{taxref_compile_time_min = }")
-    return matcher
 
 # returns the pattern for recognising binoms preceding a famous naturalist
 def get_names():
@@ -197,27 +134,24 @@ def get_names():
 
 
 latin_binom = get_latin_expr(tables_relachee(), ucword, lcword)
+# print(f"{latin_binom = }")
 re_latin = re.compile(latin_binom)
 
 
 t = tables_restreintes()
 latin_focused_min_min = get_latin_expr(t, lcword, lcword)
 latin_focused_maj_maj = get_latin_expr(t, ucword, ucword)
-re_latin_focused = re.compile(latin_focused_maj_maj)
+# re_latin_focused = re.compile(latin_focused_maj_maj)
 
 pattern_name = get_names()
 
-Mm = re.compile(
-    rf"(?<=\W)({latin_binom})(?!-)(?=\W)")
+# Mm = re.compile(rf"(?<=\W)({latin_binom})(?!-)(?=\W)")
 
-MmMM = re.compile(
-    rf"(?<=\W)({latin_binom}|{latin_focused_maj_maj})(?!-)(?=\W)")
+# MmMM = re.compile(rf"(?<=\W)({latin_binom}|{latin_focused_maj_maj})(?!-)(?=\W)")
 
-Mmmm = re.compile(
-    rf"(?<=\W)({latin_binom}|{latin_focused_min_min})(?!-)(?=\W)")
+# Mmmm = re.compile(rf"(?<=\W)({latin_binom}|{latin_focused_min_min})(?!-)(?=\W)")
 
-MmMMmm = re.compile(
-    rf"(?<=\W)({latin_binom}|{latin_focused_maj_maj}|{latin_focused_min_min})(?!-)(?=\W)")
+# MmMMmm = re.compile(rf"(?<=\W)({latin_binom}|{latin_focused_maj_maj}|{latin_focused_min_min})(?!-)(?=\W)")
 
 
 # get the list of frequent words to remove and compile it to a regex
@@ -234,34 +168,158 @@ def clear_stopwords(article):
 def c(m, s, start, end, context, size):
     return (m, s[max(start-size, 0):min(end+size, len(s))]) if context else m
 
-matcher_taxref = False
-matcher_taxref_abs3 = False
-matcher_taxref_abs5 = False
-matcher_taxref_abs7 = False
+def compile_latin(latin_expr):
+    before_latin_compile = time.time()
+    matcher = re.compile(rf"(?<=\W)({latin_expr})(?!-)(?=\W)")
+    after_latin_compile = time.time()
+    latin_compile_time_min = (after_latin_compile - before_latin_compile)/60
+    print(f"{latin_compile_time_min = }")
+    return matcher
+
+latin_matcher = False
 
 # evaluates the article according with the asked mode
-def classify(article, context=False, size=30, mode="3"):
-    if mode >= "3":
-        abbrev = True
-    else:
-        abbrev = False
-    if mode == "1":  # Mm
-        matcher = Mm
-    elif mode == "2":  # Mm MM
-        matcher = MmMM
-    elif mode == "3":  # Mm A
-        matcher = Mm
-    elif mode == "4":  # Mm MM A
-        matcher = MmMM
-    elif mode == "5":  # Mm mm A
-        matcher = Mmmm
-    elif mode == "6":  # Mm MM mm A
-        matcher = MmMMmm
-    elif mode == "7":  # TAXREF A (A est câblé dans TAXREF)
-        global matcher_taxref
-        if not matcher_taxref:
-            taxref_expr = get_taxref_expr("accurate")
-            matcher_taxref = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+def classify_latin(article, context=False, size=30, mode="raw"):
+    abbrev = re.search(r"A", mode)
+    
+    # global latin_expr
+    latin_expr = f"{latin_binom}" # if re.search(r"Mm", mode) else ""
+    # latin_expr = latin_expr + f"|{latin_focused_maj_maj}" if re.search(r"MM", mode) else ""
+    # latin_expr = latin_expr + f"|{latin_focused_min_min}" if re.search(r"min", mode) else ""
+    
+    global latin_matcher
+    if not latin_matcher:
+        latin_matcher = compile_latin(latin_expr) # re.compile(rf"(?<=\W)(latin_expr)(?!-)(?=\W)")  
+    matcher = latin_matcher
+
+    s = article  # clear_stopwords(article)
+    
+    result = []
+    r = r"(?<=\W)("
+    b = False
+    
+    for match in matcher.finditer(s):
+        m = match[0]
+        result.append(c(m, s, match.start(), match.end(), context, size))
+        # if the binom starts with a capitalized letter,
+        # add the possibility to match a binom with this genus abreviated
+        if abbrev:
+            a = re.match(upper_case, m)
+            if a and a[0] != 'M':
+                b = True
+                r += rf"{a[0]}\.\s{acword}|"
+    # try to find all the abreviated binoms in the page
+    r = r[:-1] + r")(?=\W)"
+    # do the search only if there are geni that can be abreviated
+    if b:
+        for match in re.finditer(r, s):
+            m = match[0]
+            result.append(c(m, s, match.start(), match.end(), context, size))
+    return result
+
+
+######################### TAXREF BASED CLASSIFIER ##########################
+
+taxref_dir = "../../.."
+
+def is_article(s):
+    return s in {"du", "Du", "le", "Le", "d"}
+
+# returns a regex that matches binoms of the TAXREF base
+def get_taxref_expr(abbrev = False):
+    before_taxref_build = time.time()
+        
+    taxref = open(f"{taxref_dir}/taxref.out").read()
+    taxref_raw_lines = re.split(r'\n', re.sub(r"\[.*\]|\(.*\)|\?|\"", "", taxref))
+    # print(f"{taxref_raw_lines = }")
+    
+    taxref_gen_spe = []
+    #build a Genus -> species dictionnary
+    taxref_dic = {}
+    for line in taxref_raw_lines:
+        # print(f"{line = }")
+        
+        # a few paticuliar cases
+        if line == "" or line[0] == "+" or " x " in line or not " " in line: continue
+        line_split = re.split(r' +', line)
+        gen = line_split[0] ; spe = line_split[1]
+        if gen == "" or spe == "" : continue
+        if is_article(spe):
+            if len(line_split) > 2: spe = " ".join([spe, line_split[2]]) 
+            else: continue
+        
+        # Genius species litterally extracted from TAXREF
+        if gen not in taxref_dic:
+            taxref_dic[gen] = {spe}
+        else:
+            taxref_dic[gen].add(spe)
+        
+        # G. species extracted from TAXREF only if $abbrev
+        if abbrev:
+            g = gen[0] + r"\."
+            if g not in taxref_dic:
+                taxref_dic[g] = {spe}
+            else:
+                taxref_dic[g].add(spe)
+    # print(f"{taxref_dic = }")
+    
+    # computes statistics on the Genus -> species dictionary
+    print(f"taxref_dic size ({'abbrev' if abbrev else 'strict'}) = {len(taxref_dic)}")
+    print(f"taxref_dic # species / gen = {sum([len(taxref_dic[gen]) for gen in taxref_dic]) / len(taxref_dic)}")
+    
+    # a function for summing (regex operator |) the species of a given genius
+    spe_sum = ( lambda gen: ( ("" if len(taxref_dic[gen]) == 1 else "(") 
+                            + "|".join(taxref_dic[gen]) 
+                            + ("" if len(taxref_dic[gen]) == 1 else ")") ) )
+
+    taxref_expr = "(" + "|".join([f"({gen} {spe_sum(gen)})" for gen in taxref_dic]) + ")"        
+    # print(f"{taxref_expr = }")
+
+    after_taxref_build = time.time()
+    taxref_build_time_min = (after_taxref_build - before_taxref_build)/60
+    print(f"{taxref_build_time_min = }")
+    return taxref_expr
+
+def compile_taxref(taxref_expr):
+    before_taxref_compile = time.time()
+    matcher = re.compile(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+    after_taxref_compile = time.time()
+    taxref_compile_time_min = (after_taxref_compile - before_taxref_compile)/60
+    print(f"{taxref_compile_time_min = }")
+    return matcher
+
+taxref_matcher = False
+
+# evaluates the article according with the asked mode
+def classify_taxref(article, context=False, size=30, mode="raw"):
+    abbrev = re.search(r"A", mode)
+    
+    global taxref_matcher
+    if not taxref_matcher:
+        taxref_expr = get_taxref_expr(abbrev)
+        taxref_matcher = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+    matcher = taxref_matcher
+
+    s = clear_stopwords(article)
+    
+    result = []
+    b = False
+    for match in matcher.finditer(s):
+        m = match[0]
+        result.append(c(m, s, match.start(), match.end(), context, size))
+    return result
+
+
+######################### TAXREF BASED RELAXED CLASSIFIER ##########################
+
+# evaluates the article according with the asked mode
+def classify_abstaxref(article, context=False, size=30, mode="raw"):
+    abbrev = re.search(r"A", mode)
+
+    global matcher_taxref
+    if not matcher_taxref:
+        taxref_expr = get_taxref_expr("accurate")
+        matcher_taxref = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref
         abbrev = False
     elif mode == "7abs3":  # TAXREF abstrait suffixes de taille 3
@@ -309,8 +367,10 @@ def classify(article, context=False, size=30, mode="3"):
         for match in re.finditer(r, s):
             m = match[0]
             result.append(c(m, s, match.start(), match.end(), context, size))
+
     return result
 
+################### MEASUREMENT TOOLS ##########################################@
 
 def f_measure(precision, recall):
     if(precision == 0 and recall == 0):
@@ -326,10 +386,8 @@ def handle_linnaeus(article):
     os.system("rm -f tmp")
     return res
 
-
 def handle_species(article):
     return []
-
 
 # given an article, the chosen mode of recognition and
 # the expected results for this article
@@ -338,8 +396,12 @@ def handle_species(article):
 def check(article, expected, classifier, mode=3):
     with open(article) as in_:
         text = in_.read()
-    if classifier == "CRI":
-        finds = classify(text, context=True, mode=mode)
+    if classifier == "LATIN":
+        finds = classify_latin(text, context=True, mode=mode)
+    elif classifier == "TAXREF":
+        finds = classify_taxref(text, context=True, mode=mode)
+    elif classifier == "ABSTAXREF":
+        finds = classify_abstaxref(text, context=True, mode=mode)
     elif classifier == "LINNAEUS":
         finds = handle_linnaeus(article)
     elif classifier == "SPECIES":
@@ -439,15 +501,9 @@ corpus_path = "Processed_corpus"
 expected_results_path = "Experiences/Expected_results_position"
 default_mode = 1
 help_mode = '''R|\
-choose the recognition mode:
-    1: Mm
-    2: Mm MM
-    3: Mm A
-    4: Mm MM A
-    5: Mm mm A
-    6: Mm MM mm A
-    7: TAXREF'''
-mode_choices = ["1", "2", "3", "4", "5", "6", "7", "7abs3", "7abs5", "7abs7"] # range(1, 8)
+select one or several recognition modes: raw, A, Mm, MM, mm,
+and form a ':'-separated string of the selected modes'''
+mode_choices = ["raw", "A", "Mm", "MM", "mm", "mM"] # range(1, 8)
 # volumes_path = "archives_pretraitees/"
 volumes_path = "archives_pretraitees/"
 

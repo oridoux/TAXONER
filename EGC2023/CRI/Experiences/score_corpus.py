@@ -26,11 +26,11 @@ parser.add_argument("-m", "--mode", # type=int,
                     help=ex.help_mode, choices=ex.mode_choices)
 parser.add_argument(
     "-v", "--Verbose", help="if activated prints the results on each article",
-    default=1, type=int)
+    default=0, type=int)
 parser.add_argument("-t", "--Take_traps", type=int, default=1,
                     help="consider articles with no expected output when scoring")
-parser.add_argument("-cl", "--Classifier", default="CRI",
-                    choices=["CRI", "LINNAEUS", "SPECIES"],
+parser.add_argument("-cl", "--Classifier", default="LATIN",
+                    choices=["LATIN", "TAXREF", "ABSTAXREF", "LINNAEUS", "SPECIES"],
                     help="the classifier used")
 args = parser.parse_args()
 
@@ -46,6 +46,7 @@ daytime = today.strftime("%B %d, %Y at %H:%M:%S")
 # of false positives, negatives and true positives
 # obtained processing the corpus
 def evaluation(corpus, exp, classifier, mode):
+    test_cpt = 0
     result = ""
     nfps = nfns = ntps = 0
     with os.scandir(corpus) as it:
@@ -53,6 +54,7 @@ def evaluation(corpus, exp, classifier, mode):
     bar = Bar('Processing ' + corpus.name, fill='#', max=count)
     with os.scandir(corpus) as it:
         for entry in it:
+            if test_cpt == 5: continue
             if entry.is_file():
                 page = re.search(
                     r"page_(?P<page>[0-9]+)\.txt", entry.name)
@@ -64,6 +66,7 @@ def evaluation(corpus, exp, classifier, mode):
                     name = re.sub(r"\.txt", "", entry.name)
                     s, tps, fns, fps = ex.evaluate(
                         os.path.join(corpus, entry.name), name, expected, classifier, mode=mode)
+                    test_cpt += 1
                     if args.Verbose:
                         result += s
                     ntps += tps
