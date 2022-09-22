@@ -133,14 +133,11 @@ def get_names():
     return prec + names
 
 
-latin_binom = get_latin_expr(tables_relachee(), ucword, lcword)
 # print(f"{latin_binom = }")
-re_latin = re.compile(latin_binom)
+# re_latin = re.compile(latin_binom)
 
 
 t = tables_restreintes()
-latin_focused_min_min = get_latin_expr(t, lcword, lcword)
-latin_focused_maj_maj = get_latin_expr(t, ucword, ucword)
 # re_latin_focused = re.compile(latin_focused_maj_maj)
 
 pattern_name = get_names()
@@ -182,13 +179,16 @@ latin_matcher = False
 def classify_latin(article, context=False, size=30, mode="raw"):
     abbrev = re.search(r"A", mode)
     
-    # global latin_expr
-    latin_expr = f"{latin_binom}" # if re.search(r"Mm", mode) else ""
-    # latin_expr = latin_expr + f"|{latin_focused_maj_maj}" if re.search(r"MM", mode) else ""
-    # latin_expr = latin_expr + f"|{latin_focused_min_min}" if re.search(r"min", mode) else ""
-    
     global latin_matcher
     if not latin_matcher:
+        latin_binom = get_latin_expr(tables_relachee(), ucword, lcword)
+        latin_expr = f"{latin_binom}" # else ""
+        if re.search(r"MM", mode):
+            latin_focused_maj_maj = get_latin_expr(tables_restreintes(), ucword, ucword)
+            latin_expr = latin_expr + f"|{latin_focused_maj_maj}"  # else ""
+        if re.search(r"min", mode):
+            latin_focused_min_min = get_latin_expr(tables_restreintes(), lcword, lcword)
+            latin_expr = latin_expr + f"|{latin_focused_min_min}"  # else ""
         latin_matcher = compile_latin(latin_expr) # re.compile(rf"(?<=\W)(latin_expr)(?!-)(?=\W)")  
     matcher = latin_matcher
 
@@ -300,7 +300,7 @@ def classify_taxref(article, context=False, size=30, mode="raw"):
         taxref_matcher = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
     matcher = taxref_matcher
 
-    s = clear_stopwords(article)
+    s = article # clear_stopwords(article)
     
     result = []
     b = False
