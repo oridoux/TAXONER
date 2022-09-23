@@ -10,9 +10,9 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser(
     description="scans trough a volume and finds the binoms", formatter_class=SmartFormatter)
-parser.add_argument("-v", "--volume",
-                    help="if provided, the volume number in wich to do the\
-                    operation, else scans trough the whole archive")
+# parser.add_argument("-v", "--volume",
+#                     help="if provided, the volume number in wich to do the\
+#                     operation, else scans trough the whole archive")
 parser.add_argument("-i", "--input", help="the file or directory to classify")
 parser.add_argument(
     "-o", "--output",
@@ -22,6 +22,9 @@ parser.add_argument("-p", "--path", help="the path to the volumes",
 parser.add_argument("-m", "--mode", type=int,
                     default=ex.default_mode,
                     help=ex.help_mode, choices=ex.mode_choices)
+parser.add_argument("-cl", "--Classifier", default=ex.default_classifier,
+                    choices=ex.classifier_choices,
+                    help=ex.help_classifier)
 parser.add_argument("-r", "--regex", help=ex.help_regex,
                     default=ex.default_regex)
 parser.add_argument("-s", "--stopwords",
@@ -48,14 +51,14 @@ punctuation_spaces = re.compile(r"\W|\s", flags=re.IGNORECASE)
 
 
 # given a page, returns the list of matches
-def scan_page(p, stopwords, mode, expr):
+def scan_page(p, stopwords, classifier, mode, expr):
     with open(p, "r") as page:
         res = ex.classify(
-            page.read(), stopwords, context=True, mode=mode, expr=expr)
+            page.read(), classifier, stopwords, context=True, mode=mode, expr=expr)
         return [r[0] + " in: " + p.name + " context: " + r[1] for r in res]
 
 
-def scan_volume(volume_path, mode, expr, stopwords):
+def scan_volume(volume_path, classifier, mode, expr, stopwords):
     # with Pool() as pool:
     #     pages = [os.path.join(volume_path, p) for p in os.listdir(volume_path)]
     #     matches = pool.imap(scan_page, pages, 4)
@@ -72,23 +75,23 @@ def scan_volume(volume_path, mode, expr, stopwords):
             # if count == 0:
             #     bar.next()
             if entry.is_file():
-                scan_page(entry, stopwords, mode, expr)
+                scan_page(entry, stopwords, classifier, mode, expr)
     #         count = (count + 1) % percent
     # bar.finish()
     print("finished scanning volume " + volume_path)
     return matches
 
 
-# get all the matches for the volume entry
-# used to process the different volumes in paralell with Pool.map
-def process_volume(volume_name, stopwords):
-    vol_p = os.path.join(args.path, volume_name, "texts")
-    matches = scan_volume(vol_p, args.mode, args.regex, stopwords)
-    print(f"finished processing {volume_name}")
-    return matches
+# # get all the matches for the volume entry
+# # used to process the different volumes in paralell with Pool.map
+# def process_volume(volume_name, stopwords):
+#     vol_p = os.path.join(args.path, volume_name, "texts")
+#     matches = scan_volume(vol_p, args.classifier, args.mode, args.regex, stopwords)
+#     print(f"finished processing {volume_name}")
+#     return matches
 
 
-def reccursively_process(entry, path, stopwords, mode, expr):
+def reccursively_process(entry, path, stopwords, classifier, mode, expr):
     for f in os.scandir(entry):
         p = os.path.join(path, f.name)
         if f.is_dir():
@@ -98,14 +101,14 @@ def reccursively_process(entry, path, stopwords, mode, expr):
             os.system(cmd)
             reccursively_process(f, p, stopwords, mode, expr)
         if f.is_file():
-            r = scan_page(f, stopwords, mode, expr)
+            r = scan_page(f, stopwords, classifier, mode, expr)
             res = "\n".join(r)
             with open(p, "a") as out:
                 out.write(res)
 
 
 if __name__ == "__main__":
-    if args.mode == 0 and args.regex == ex.default_regex:
+    if args.Classifier == "INPUT" and args.regex == ex.default_regex:
         exit(ex.missing_regex_message)
     stopwords = ex.compile_stopwords(args.stopwords)
     matches = []
@@ -119,37 +122,37 @@ if args.input:
         cmd = "mkdir -p " + args.output
         os.system(cmd)
         reccursively_process(
-            args.input, args.output, stopwords, args.mode, args.regex)
-else:
-    if args.volume:
-        volume_path = get_volume_path(args.volume, args.path)
-        matches = scan_volume(volume_path, args.mode)
-    else:
-        # # actuellement très inneficace, trouver pourquoi.
-        # with Pool() as pool:
-        #     volume_names = os.listdir(args.path)
-        #     matches = pool.map(process_volume, volume_names)
-        #     # flatten the list
-        #     matches = list(numpy.concatenate(matches).flat)
-        #     # sort the results by alphabetical order of genre names
-        #     # then species name (then volume/page)
-        #     matches = sorted(matches)
-        with os.scandir(args.path) as it:
-            nb = len([entry for entry in it if entry.is_dir()])
-        count = 0
-        percent = nb // 100 if nb > 100 else nb
-        bar = Bar('Processing archive',
-                  fill='#', suffix='%(percent)d%%')
-        matches = []
-        with os.scandir(args.path) as it:
-            for entry in it:
-                if count == 0:
-                    bar.next()
-                if entry.is_dir():
-                    matches += scan_volume(os.path.join(entry,
-                                                        "texts"), args.mode, args.regex, stopwords)
-                count = (count + 1) % percent
-        bar.finish()
-    # print the results as a string of all results, one match per line
-    res = "\n".join(matches)
-    ex.print_res(args.output, res)
+            args.input, args.output, stopwords, args.classifier, args.mode, args.regex)
+# else:
+#     if args.volume:
+#         volume_path = get_volume_path(args.volume, args.path)
+#         matches = scan_volume(volume_path, args.classifier, args.mode)
+#     else:
+#         # # actuellement très inneficace, trouver pourquoi.
+#         # with Pool() as pool:
+#         #     volume_names = os.listdir(args.path)
+#         #     matches = pool.map(process_volume, volume_names)
+#         #     # flatten the list
+#         #     matches = list(numpy.concatenate(matches).flat)
+#         #     # sort the results by alphabetical order of genre names
+#         #     # then species name (then volume/page)
+#         #     matches = sorted(matches)
+#         with os.scandir(args.path) as it:
+#             nb = len([entry for entry in it if entry.is_dir()])
+#         count = 0
+#         percent = nb // 100 if nb > 100 else nb
+#         bar = Bar('Processing archive',
+#                   fill='#', suffix='%(percent)d%%')
+#         matches = []
+#         with os.scandir(args.path) as it:
+#             for entry in it:
+#                 if count == 0:
+#                     bar.next()
+#                 if entry.is_dir():
+#                     matches += scan_volume(os.path.join(entry,
+#                                                         "texts"), args.mode, args.regex, stopwords)
+#                 count = (count + 1) % percent
+#         bar.finish()
+#     # print the results as a string of all results, one match per line
+#     res = "\n".join(matches)
+#     ex.print_res(args.output, res)

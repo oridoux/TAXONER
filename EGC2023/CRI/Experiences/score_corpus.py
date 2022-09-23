@@ -26,12 +26,12 @@ parser.add_argument("-m", "--mode",  # type=int,
                     help=ex.help_mode, choices=ex.mode_choices)
 parser.add_argument(
     "-v", "--Verbose", help="if activated prints the results on each article",
-    default=1, type=int)
+    default=0, type=int)
 parser.add_argument("-t", "--Take_traps", type=int, default=1,
                     help="consider articles with no expected output when scoring")
-parser.add_argument("-cl", "--Classifier", default="CRI",
-                    choices=["CRI", "LINNAEUS"],
-                    help="the classifier used")
+parser.add_argument("-cl", "--Classifier", default=ex.default_classifier,
+                    choices=ex.classifier_choices,
+                    help=ex.help_classifier)
 parser.add_argument("-r", "--regex", help=ex.help_regex,
                     default=ex.default_regex)
 parser.add_argument("-s", "--stopwords",
@@ -53,6 +53,7 @@ daytime = today.strftime("%B %d, %Y at %H:%M:%S")
 # of false positives, negatives and true positives
 # obtained processing the corpus
 def evaluation(corpus, exp, classifier, mode, expr, stopwords):
+    test_cpt = 0
     result = ""
     nfps = nfns = ntps = 0
     with os.scandir(corpus) as it:
@@ -60,6 +61,8 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
     bar = Bar('Processing ' + corpus, fill='#', max=count)
     with os.scandir(corpus) as it:
         for entry in it:
+            if test_cpt == 5:
+                continue
             if entry.is_file():
                 page = re.search(
                     r"page_(?P<page>[0-9]+)\.txt", entry.name)
@@ -72,6 +75,7 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
                     s, tps, fns, fps = ex.evaluate(
                         os.path.join(corpus, entry.name), name, expected,
                         classifier, stopwords, mode=mode, expr=expr)
+                    test_cpt += 1
                     if args.Verbose:
                         result += s
                     ntps += tps
@@ -82,7 +86,7 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
         prec = "{:.2f}".format(precision*100)
         rec = "{:.2f}".format(recall*100)
         fmes = "{:.2f}".format(fm*100)
-        result += f"\noverall scores on the corpus {corpus.name}:\n\tprecision = {prec} %\n"
+        result += f"\noverall scores on the corpus {corpus}:\n\tprecision = {prec} %\n"
         if args.Verbose:
             result += f"\trecall = {rec} %\n\tF-measure = {fmes} %\n\n{li}\n{li}\n\n"
         else:
@@ -92,7 +96,7 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
 
 
 if __name__ == "__main__":
-    if args.mode == 0 and args.regex == ex.default_regex:
+    if args.Classifier == "INPUT" and args.regex == ex.default_regex:
         exit(ex.missing_regex_message)
     stopwords = ex.compile_stopwords(args.stopwords)
     sys.path.insert(0, f'./{args.Expected_results}')
