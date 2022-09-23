@@ -240,7 +240,7 @@ def classify_latin(article, stopwords, context=False, size=30, mode="raw"):
             latin_focused_maj_maj = get_latin_expr(
                 tables_restreintes(), ucword, ucword)
             latin_expr = latin_expr + f"|{latin_focused_maj_maj}"  # else ""
-        if re.search(r"min", mode):
+        if re.search(r"mm", mode):
             latin_focused_min_min = get_latin_expr(
                 tables_restreintes(), lcword, lcword)
             latin_expr = latin_expr + f"|{latin_focused_min_min}"  # else ""
@@ -363,7 +363,6 @@ def classify_abstaxref(article, stopwords, context=False, size=30, mode="raw"):
         taxref_expr = get_taxref_expr("accurate")
         matcher_taxref = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref
-        abbrev = False
     elif mode == "7abs3":  # TAXREF abstrait suffixes de taille 3
         global matcher_taxref_abs3
         if not matcher_taxref_abs3:
@@ -371,7 +370,6 @@ def classify_abstaxref(article, stopwords, context=False, size=30, mode="raw"):
             matcher_taxref_abs3 = compile_taxref(
                 rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref_abs3
-        abbrev = False
     elif mode == "7abs5":  # TAXREF abstrait suffixes de taille 5
         global matcher_taxref_abs5
         if not matcher_taxref_abs5:
@@ -379,7 +377,6 @@ def classify_abstaxref(article, stopwords, context=False, size=30, mode="raw"):
             matcher_taxref_abs5 = compile_taxref(
                 rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref_abs5
-        abbrev = False
     elif mode == "7abs7":  # TAXREF abstrait suffixes de taille 7
         global matcher_taxref_abs7
         if not matcher_taxref_abs7:
@@ -387,11 +384,10 @@ def classify_abstaxref(article, stopwords, context=False, size=30, mode="raw"):
             matcher_taxref_abs7 = compile_taxref(
                 rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref_abs7
-        abbrev = False
     else:
         # should not arrive but if the modes change will allow to see it quickly
         exit("unexpected mode")
-    return apply_matcher(stopwords, article, matcher, abbrev, context, size)
+    return apply_matcher(stopwords, article, matcher, False, context, size)
 
 
 ################### OTHER MATCHERS ##########################################@

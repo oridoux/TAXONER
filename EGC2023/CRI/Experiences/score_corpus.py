@@ -106,7 +106,7 @@ if __name__ == "__main__":
     import expected_results_vol155 as vol155
     expected = {12: vol12.expected, 83: vol83.expected,
                 126: vol126.expected, 155: vol155.expected}
-    results = f"# {li}\nExperience launched on {daytime} with mode {args.mode}\n{li}\n"
+    results = f"# {li}\nExperience launched on {daytime} with classifier {args.classifier} and mode {args.mode}\n{li}\n"
     nfps = nfns = ntps = 0
     entries = os.listdir(args.Corpus)
     if args.volumeSelection == "test":

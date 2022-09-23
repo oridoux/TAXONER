@@ -59,20 +59,25 @@ def find_bound():
     c = r"recall = (?P<r>\d+\.\d+) %.*"
     d = r"F-measure = (?P<fm>\d+\.\d+)"
     results = re.compile(a+b+c+d, flags=re.DOTALL)
+    stops_path = "Experiences/tmp_stopwords.txt"
     if args.mode == "CRI":
-        mode = "3"
+        classifier = "LATIN"
+        file_name = "evolution_latin.csv"
     elif args.mode == "TAXREF":
-        mode = "7abs3"
-    cmd = f"python3 Experiences/score_corpus.py -o tmp -m {mode} -vs calibration"
+        classifier = "ABSTAXREF"
+        file_name = "evolution_TAXREF.csv"
+    else:
+        exit("unexpected mode")
+    cmd = f"python3 Experiences/score_corpus.py -o tmp -cl {classifier} -s {stops_path} -vs calibration"
     best_prec = (.0, "0")
     best_rec = (.0, "0")
     best_fm = (.0, "0")
-    with open("evolution.csv", "w") as data:
+    with open(file_name, "w") as data:
         data.write("i,precision,recall,fmeasure\n")
         for i in range(500, 45000, 5000):
             print(f"starting the evaluation with {i} words removed")
             stri = str(i)
-            cmd_stopwords = f"python3 Experiences/compute_stopwords.py -n {i} Experiences/stopwords.txt"
+            cmd_stopwords = f"python3 Experiences/compute_stopwords.py -n {i} {stops_path}"
             os.system(cmd_stopwords)
             os.system(cmd)
             with open("tmp", "r") as results_file:
@@ -98,7 +103,9 @@ def find_bound():
                 if fm < .9 * best_fm[0]:
                     print_curves(x, prec, rec, fme)
                     os.system("rm tmp")
+                    os.system(f"rm {stops_path}")
                     return(stri, best_prec, best_rec, best_fm)
+            os.system(f"rm {stops_path}")
             os.system("rm tmp")
     print_curves(x, prec, rec, fme)
     return(stri, best_prec, best_rec, best_fm)
