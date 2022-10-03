@@ -50,20 +50,23 @@ def apply_matcher(stopwords, article, matcher, abbrev, context, size):
     return result
 
 
-def classify(article, classifier, stopwords, mode="raw", expr=""):
+def classify(article, classifier, stopwords, mode="raw", expr="", adhoc=False):
     with open(article) as in_:
         text = in_.read()
     if classifier == "LATIN":
         finds = classify_latin(text, stopwords, context=True, mode=mode)
     elif classifier == "TAXREF":
         finds = classify_taxref(text, stopwords, context=True, mode=mode)
-    elif classifier == "ABSTAXREF":
-        finds = classify_abstaxref(text, stopwords, context=True, mode=mode)
+    elif classifier[:3] == "ABS":
+        finds = classify_abstaxref(
+            text, stopwords, context=True, classifier=classifier, mode=mode, adhoc=adhoc)
     elif classifier == "LINNAEUS":
         finds = handle_linnaeus(article)
     elif classifier == "INPUT":
         finds = handle_user_regex(
             text, stopwords, expr, context=True, mode=mode)
+    else:
+        exit("unexpected classifier")
     return finds
 
 
@@ -271,7 +274,7 @@ def get_taxref_expr(abbrev=False):
     # print(f"{taxref_raw_lines = }")
 
     taxref_gen_spe = []
-    #build a Genus -> species dictionnary
+    # build a Genus -> species dictionnary
     taxref_dic = {}
     for line in taxref_raw_lines:
         # print(f"{line = }")
@@ -354,33 +357,117 @@ def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
 ######################### TAXREF BASED RELAXED CLASSIFIER ##########################
 
 
-# evaluates the article according with the asked mode
-def classify_abstaxref(article, stopwords, context=False, size=30, mode="raw"):
-    abbrev = re.search(r"A", mode)
+low_c = "[éèêæœüöa-z]"
 
-    global matcher_taxref
-    if not matcher_taxref:
-        taxref_expr = get_taxref_expr("accurate")
-        matcher_taxref = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
-        matcher = matcher_taxref
-    elif mode == "7abs3":  # TAXREF abstrait suffixes de taille 3
+
+def etacnurt(word, width):  # truncate starting from the end
+    return (word if len(word) <= width else ("@" + word[-width:]))
+
+
+def regex_of_spe(spe, adhoc=False, uc=False):
+    if adhoc and (spe[-1] == "i" or spe[-3:-1] == "sis"):
+        return re.sub(r"@", "[ÆŒA-Z][éèêæœüöa-z]*(-[éèêæœüöa-z])?", spe)
+    else:
+        s = f"{upper_case}{low_c}*" if uc else f"{low_c}+(-{low_c})?"
+        return re.sub(r"@", s, spe)
+
+
+def regex_of_gen(gen, lc=False):
+    s = f"{low_c}+" if lc else f"{upper_case}{low_c}*"
+    return re.sub(r"@", s, gen)
+
+
+# returns a regex that matches abstracted binoms of the TAXREF base
+def get_abstaxref_expr(abs_width=3, abbrev=False, MM=False, mm=False, adhoc=False):
+    before_taxref_build = time.time()
+
+    taxref = open(f"{taxref_dir}/taxref.out").read()
+    taxref_raw_lines = re.split(r'\n', re.sub(
+        r"\[.*\]|\(.*\)|\?|\"", "", taxref))
+    # print(f"{taxref_raw_lines = }")
+    taxref_gen_spe = []
+    taxref_dic = {}
+    for line in taxref_raw_lines:
+        # print(f"{line = }")
+        if line == "" or " x " in line or line[0] == "+" or " " not in line:
+            continue
+        line_split = re.split(r' +', line)
+        gen = line_split[0]
+        spe = line_split[1]
+        if gen == "" or spe == "":
+            continue
+        # handle species with particle
+        if is_article(spe):
+            if len(line_split) > 2:
+                spe = " ".join([spe, line_split[2]])
+            else:
+                continue
+        g = gen[0] + r"\."
+        spe_suff = etacnurt(spe, abs_width)
+        gen_suff = etacnurt(gen, abs_width)
+        # G. species extracted from TAXREF only if $abbrev
+        if abbrev:
+            if g not in taxref_dic:
+                taxref_dic[g] = {spe_suff}
+            elif spe_suff not in taxref_dic[g]:
+                taxref_dic[g].add(spe_suff)
+        if gen_suff not in taxref_dic:
+            taxref_dic[gen_suff] = {spe_suff}
+        elif spe_suff not in taxref_dic[gen_suff]:
+            taxref_dic[gen_suff].add(spe_suff)
+    print(
+        f"taxref_dic size ({'abbrev' if abbrev else 'strict'}) = {len(taxref_dic)}")
+    print(
+        f"taxref_dic # species / gen = {sum([len(taxref_dic[gen]) for gen in taxref_dic]) / len(taxref_dic)}")
+
+    spe_sum = (lambda gen: (("" if len(taxref_dic[gen]) == 1 else "(")
+                            + "|".join(map((lambda s: regex_of_spe(s, adhoc=adhoc, uc=MM)), taxref_dic[gen]))
+                            + ("" if len(taxref_dic[gen]) == 1 else ")")))
+    prefix = r"(?!(nous|Nous|Plus|Mais|\w+tion|(\w+|[A-Z]\.) (\w+tion|\w+tions|\w+enne|\w+ennes|\w+elle|\w+elles|dans|nous|sous|sans|plus|sera|vers|puis)))" if adhoc else ""
+    taxref_expr = prefix + \
+        "(" + "|".join([f"({regex_of_gen(gen, lc=mm)} {spe_sum(gen)})" for gen in taxref_dic]) + ")"
+    # print(f"{taxref_expr = }")
+    after_taxref_build = time.time()
+    taxref_build_time_min = (after_taxref_build - before_taxref_build)/60
+    print(f"{taxref_build_time_min = }")
+    return taxref_expr
+
+
+matcher_taxref_abs3 = False
+matcher_taxref_abs5 = False
+matcher_taxref_abs7 = False
+
+
+# evaluates the article according with the asked mode
+def classify_abstaxref(article, stopwords, context=False, size=30, classifier="abs3", mode="raw", adhoc=False):
+    abbrev = re.search(r"A", mode)
+    MM = re.search(r"MM", mode)
+    mm = re.search("mm", mode)
+    # if classifier == "accurate":
+    #     global matcher_abstaxref
+    #     if not matcher_abstaxref:
+    #         taxref_expr = get_taxref_expr("accurate")
+    #         matcher_abstaxref = compile_taxref(
+    #             rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+    #         matcher = matcher_abstaxref
+    if classifier == "ABS3":  # TAXREF abstrait suffixes de taille 3
         global matcher_taxref_abs3
         if not matcher_taxref_abs3:
-            taxref_expr = get_taxref_expr("7abs3")
+            taxref_expr = get_abstaxref_expr(3, abbrev, MM, mm, adhoc)
             matcher_taxref_abs3 = compile_taxref(
                 rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref_abs3
-    elif mode == "7abs5":  # TAXREF abstrait suffixes de taille 5
+    elif classifier == "ABS5":  # TAXREF abstrait suffixes de taille 5
         global matcher_taxref_abs5
         if not matcher_taxref_abs5:
-            taxref_expr = get_taxref_expr("7abs5")
+            taxref_expr = get_abstaxref_expr(5, abbrev, MM, mm, adhoc)
             matcher_taxref_abs5 = compile_taxref(
                 rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref_abs5
-    elif mode == "7abs7":  # TAXREF abstrait suffixes de taille 7
+    elif classifier == "ABS7":  # TAXREF abstrait suffixes de taille 7
         global matcher_taxref_abs7
         if not matcher_taxref_abs7:
-            taxref_expr = get_taxref_expr("7abs7")
+            taxref_expr = get_abstaxref_expr(7, abbrev, MM, mm, adhoc)
             matcher_taxref_abs7 = compile_taxref(
                 rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         matcher = matcher_taxref_abs7
@@ -428,10 +515,11 @@ def f_measure(precision, recall):
 # the expected results for this article
 # returns the false positives, false negatives and true positives
 # when recognisiong with the mode mode
-def check(article, expected, classifier, stopwords, mode="raw", expr=""):
+def check(article, expected, classifier, stopwords, mode="raw", expr="", adhoc=False):
     with open(article) as in_:
         text = in_.read()
-    finds = classify(article, classifier, stopwords, mode=mode, expr=expr)
+    finds = classify(article, classifier, stopwords,
+                     mode=mode, expr=expr, adhoc=adhoc)
     fps = []
     fns = []
     tps = []
@@ -496,8 +584,9 @@ def score(fps, fns, tps):
 #  and the chosen mode of recognition
 #  and return the effective matches the number of
 # true positives, false negatives and false positives
-def evaluate(article, name, expected, classifier, stopwords, mode=3, expr=""):
-    (fps, fns, tps) = check(article, expected, classifier, stopwords, mode, expr)
+def evaluate(article, name, expected, classifier, stopwords, mode=3, expr="", adhoc=False):
+    (fps, fns, tps) = check(article, expected,
+                            classifier, stopwords, mode, expr, adhoc=adhoc)
     (precision, recall, fm) = score(len(fps), len(fns), len(tps))
     prec = "{:.2f}".format(precision*100)
     rec = "{:.2f}".format(recall*100)
@@ -538,7 +627,8 @@ help_regex = "input a regex (path to a file with the regex on the first line) to
 default_regex = ""
 missing_regex_message = "user chose classifier INPUT and did not input a regex"
 help_classifier = "the classifier used, if INPUT is chosen, it is expected that the regex option is also used"
-classifier_choices = ["LATIN", "TAXREF", "ABSTAXREF", "LINNAEUS", "INPUT"]
+classifier_choices = ["LATIN", "TAXREF",
+                      "ABS3", "ABS5", "ABS7", "LINNAEUS", "INPUT"]
 default_classifier = "LATIN"
 
 

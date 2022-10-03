@@ -39,6 +39,8 @@ parser.add_argument("-s", "--stopwords",
 parser.add_argument("-vs", "--volumeSelection", default="all",
                     help="the volume selection that will be used",
                     choices=["all", "calibration", "test"])
+parser.add_argument("-a", "--adhoc", default=0, type=int,
+                    help="if non-zero, activates the adhoc processing for the ABS classifier")
 args = parser.parse_args()
 
 # format for the date of when the experience was carried
@@ -61,8 +63,8 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
     bar = Bar('Processing ' + corpus, fill='#', max=count)
     with os.scandir(corpus) as it:
         for entry in it:
-            if test_cpt == 5:
-                continue
+            # if test_cpt == 5:
+            #     continue
             if entry.is_file():
                 page = re.search(
                     r"page_(?P<page>[0-9]+)\.txt", entry.name)
@@ -74,7 +76,7 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
                     name = re.sub(r"\.txt", "", entry.name)
                     s, tps, fns, fps = ex.evaluate(
                         os.path.join(corpus, entry.name), name, expected,
-                        classifier, stopwords, mode=mode, expr=expr)
+                        classifier, stopwords, mode=mode, expr=expr, adhoc=args.adhoc)
                     test_cpt += 1
                     if args.Verbose:
                         result += s
@@ -106,7 +108,7 @@ if __name__ == "__main__":
     import expected_results_vol155 as vol155
     expected = {12: vol12.expected, 83: vol83.expected,
                 126: vol126.expected, 155: vol155.expected}
-    results = f"# {li}\nExperience launched on {daytime} with classifier {args.classifier} and mode {args.mode}\n{li}\n"
+    results = f"# {li}\nExperience launched on {daytime} with classifier {args.Classifier} and mode {args.mode}\n{li}\n"
     nfps = nfns = ntps = 0
     entries = os.listdir(args.Corpus)
     if args.volumeSelection == "test":

@@ -64,11 +64,11 @@ def find_bound():
         classifier = "LATIN"
         file_name = "evolution_latin.csv"
     elif args.mode == "TAXREF":
-        classifier = "ABSTAXREF"
+        classifier = "ABS3"
         file_name = "evolution_TAXREF.csv"
     else:
         exit("unexpected mode")
-    cmd = f"python3 Experiences/score_corpus.py -o tmp -cl {classifier} -s {stops_path} -vs calibration"
+    cmd = f"python3 Experiences/score_corpus.py -o tmp -cl {classifier} -m A -s {stops_path} -vs calibration"
     best_prec = (.0, "0")
     best_rec = (.0, "0")
     best_fm = (.0, "0")
