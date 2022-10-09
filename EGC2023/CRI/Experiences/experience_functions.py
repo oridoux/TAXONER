@@ -256,7 +256,7 @@ def classify_latin(article, stopwords, context=False, size=30, mode="raw"):
 
 ######################### TAXREF BASED CLASSIFIER ##########################
 
-taxref_dir = "../../.."
+taxref_dir = "../../DATA"
 
 
 def is_article(s):
