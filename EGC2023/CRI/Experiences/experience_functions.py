@@ -259,6 +259,17 @@ def classify_latin(article, stopwords, context=False, size=30, mode="raw"):
 taxref_dir = "../../DATA"
 
 
+datapath = re.split(r'/', __file__)[:-3]
+datapath.append("DATA")
+
+taxref_dir = "/".join(datapath)
+
+# print(f"{datapath = }")
+# print(f"{taxref_dir = }")
+
+
+
+
 def is_article(s):
     return s in {"du", "Du", "le", "Le", "d"}
 
