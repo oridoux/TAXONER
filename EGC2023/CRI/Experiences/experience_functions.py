@@ -261,8 +261,6 @@ datapath.append("DATA")
 
 taxref_path = "/".join(datapath)
 
-# print(f"{datapath = }")
-# print(f"{taxref_dir = }")
 
 def is_article(s):
     return s in {"du", "Du", "le", "Le", "d"}
@@ -275,9 +273,7 @@ def get_taxref_expr(abbrev=False):
 
     taxref = open(f"{taxref_path}/taxref.out").read()
     taxref_raw_lines = re.split( r'\n', re.sub(r"\[.*\]|\(.*\)|\?|\"", "", taxref) )
-    # print(f"{taxref_raw_lines = }")
 
-    taxref_gen_spe = []
     # build a Genus -> species dictionnary
     taxref_dic = {}
     for line in taxref_raw_lines:
@@ -307,7 +303,6 @@ def get_taxref_expr(abbrev=False):
                 taxref_dic[g] = {spe}
             else:
                 taxref_dic[g].add(spe)
-    # print(f"{taxref_dic = }")
 
     # computes statistics on the Genus -> species dictionary
     print(
@@ -341,9 +336,9 @@ def compile_taxref(taxref_expr):
 
 taxref_matcher = False
 
-# evaluates the article according to the asked mode
-def classify_taxref(article, stopwords, context=False, size=30, mode=""):
-    # abbreviations are taken care of in the matcher
+
+# evaluates the article according with the asked mode
+def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
     abbrev = True if re.search(r"A", mode) else False
     # print(f"{abbrev = }")
     global taxref_matcher
@@ -374,12 +369,16 @@ def regex_of_spe(spe, adhoc=False, uc=False):
         # is a genitive, possibly capitalized
         return re.sub(rf"@", "{high_c}{low_c}*(-{low_c}+)?", spe)
     else:
-        s = f"{high_c}{low_c}*(-{low_c})?" if uc else f"{low_c}+(-{low_c})?"
-        return re.sub(r"@", s, spe)
+      s = f"{low_c}+(-{low_c})?"
+      if uc:
+        s = "(" + s + f"|{upper_case}{low_c}*)"
+      return re.sub(r"@", s, spe)
 
 
 def regex_of_gen(gen, lc=False):
-    s = f"{low_c}+" if lc else f"{high_c}{low_c}*"
+    s = f"{upper_case}{low_c}*"
+    if lc:
+      s = "(" + s + f"|{low_c}+)"  
     return re.sub(r"@", s, gen)
 
 
@@ -390,11 +389,8 @@ def get_abstaxref_expr(abs_width=3, abbrev=False, MM=False, mm=False, adhoc=Fals
     taxref = open(f"{taxref_path}/taxref.out").read()
     taxref_raw_lines = re.split(r'\n', re.sub(
         r"\[.*\]|\(.*\)|\?|\"", "", taxref))
-    # print(f"{taxref_raw_lines = }")
-    taxref_gen_spe = []
     taxref_dic = {}
     for line in taxref_raw_lines:
-        # print(f"{line = }")
         if line == "" or " x " in line or line[0] == "+" or " " not in line:
             continue
         line_split = re.split(r' +', line)
@@ -432,7 +428,6 @@ def get_abstaxref_expr(abs_width=3, abbrev=False, MM=False, mm=False, adhoc=Fals
     prefix = r"(?!(nous|Nous|Plus|Mais|\w+tion|(\w+|[A-Z]\.) (\w+tion|\w+tions|\w+enne|\w+ennes|\w+elle|\w+elles|dans|nous|sous|sans|plus|sera|vers|puis)))" if adhoc else ""
     taxref_expr = prefix + \
         "(" + "|".join([f"({regex_of_gen(gen, lc=mm)} {spe_sum(gen)})" for gen in taxref_dic]) + ")"
-    # print(f"{taxref_expr = }")
     after_taxref_build = time.time()
     taxref_build_time_min = (after_taxref_build - before_taxref_build)/60
     print(f"{taxref_build_time_min = }")
@@ -606,18 +601,24 @@ def print_res(output, result):
         print(result)
 
 
+
+
+
 # list of common things used in each application
 # to be able to modify them in one place
 stopwords_path = "Experiences/stopwords.txt"
 help_stopwords = f"if provided, the path to the stopwords file, else {stopwords_path}"
 corpus_path = "Processed_corpus"
 expected_results_path = "Experiences/Expected_results_position"
-default_mode = "3"
+default_mode = "A"
+mode_choices = ["A", "Mm", "MM", "mm"] 
 help_mode = '''R|\
-select one or several recognition modes: raw, A, Mm, MM, mm,
-and form a ':'-separated string of the selected modes'''
-mode_choices = ["A", "Mm", "MM", "mm", "mM"]  # range(1, 8)
-# volumes_path = "archives_pretraitees/"
+the chosen mode should be either 'raw' or  a ':'-separated string of the chosen modes from {mode_choices}
+if the argument is not provided, it is assumed that mode is {default_mode}
+- raw does not search for abbreviations
+- A searches for abbreviations
+- MM searches binoms where the species name can be capitalized
+- mm searches binoms where the genre name can be not capitalized'''
 volumes_path = "archives_pretraitees/"
 help_regex = "input a regex (path to a file with the regex on the first line) to be used as classifier"
 default_regex = ""
@@ -627,6 +628,12 @@ classifier_choices = ["LATIN", "TAXREF",
                       "ABS3", "ABS5", "ABS7", "LINNAEUS", "INPUT"]
 default_classifier = "LATIN"
 
+mode_opt = "|".join(mode_choices)
+re_modes = re.compile(rf"{mode_choices}(:{mode_choices})*")
+
+def check_mode(mode):
+	if not (re_modes.match(mode) or mode == "raw"):
+		exit(f"error : wrong mode selection. \n{help_mode}")
 
 def match_dist(pattern, word):
     # taux d'erreur de 10 %
