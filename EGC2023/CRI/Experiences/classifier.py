@@ -116,14 +116,14 @@ if __name__ == "__main__":
     if args.input:
         i = Path(args.input)
         if i.is_file():
-	    matches = scan_page(i, stopwords, args.mode, args.regex)
-	    res = "\n".join(matches)
-	    ex.print_res(args.output, res)
+          matches = scan_page(i, stopwords, args.mode, args.regex)
+          res = "\n".join(matches)
+          ex.print_res(args.output, res)
     else:
-	cmd = "mkdir -p " + args.output
-	os.system(cmd)
-	reccursively_process(
-	    args.input, args.output, stopwords, args.classifier, args.mode, args.regex)
+      cmd = "mkdir -p " + args.output
+      os.system(cmd)
+      reccursively_process(
+	      args.input, args.output, stopwords, args.classifier, args.mode, args.regex)
 # else:
 #     if args.volume:
 #         volume_path = get_volume_path(args.volume, args.path)
