@@ -23,7 +23,7 @@ parser.add_argument(
     help="if providied, the results will be printed in this file")
 parser.add_argument("-m", "--mode",  # type=int,
                     default=ex.default_mode,
-                    help=ex.help_mode, choices=ex.mode_choices)
+                    help=ex.help_mode)
 parser.add_argument(
     "-v", "--Verbose", help="if activated prints the results on each article",
     default=0, type=int)
@@ -98,8 +98,10 @@ def evaluation(corpus, exp, classifier, mode, expr, stopwords):
 
 
 if __name__ == "__main__":
+    ex.check_mode(args.mode)
     if args.Classifier == "INPUT" and args.regex == ex.default_regex:
         exit(ex.missing_regex_message)
+    
     stopwords = ex.compile_stopwords(args.stopwords)
     sys.path.insert(0, f'./{args.Expected_results}')
     import expected_results_vol12 as vol12

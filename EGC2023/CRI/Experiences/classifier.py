@@ -19,9 +19,9 @@ parser.add_argument(
     help="if providied, the results will be printed in this file")
 parser.add_argument("-p", "--path", help="the path to the volumes",
                     default=ex.volumes_path)
-parser.add_argument("-m", "--mode", type=int,
+parser.add_argument("-m", "--mode",
                     default=ex.default_mode,
-                    help=ex.help_mode, choices=ex.mode_choices)
+                    help=ex.help_mode)
 parser.add_argument("-cl", "--Classifier", default=ex.default_classifier,
                     choices=ex.classifier_choices,
                     help=ex.help_classifier)
@@ -108,21 +108,22 @@ def reccursively_process(entry, path, stopwords, classifier, mode, expr):
 
 
 if __name__ == "__main__":
+    ex.check_mode(args.mode)
     if args.Classifier == "INPUT" and args.regex == ex.default_regex:
         exit(ex.missing_regex_message)
     stopwords = ex.compile_stopwords(args.stopwords)
     matches = []
-if args.input:
-    i = Path(args.input)
-    if i.is_file():
-        matches = scan_page(i, stopwords, args.mode, args.regex)
-        res = "\n".join(matches)
-        ex.print_res(args.output, res)
+    if args.input:
+        i = Path(args.input)
+        if i.is_file():
+	    matches = scan_page(i, stopwords, args.mode, args.regex)
+	    res = "\n".join(matches)
+	    ex.print_res(args.output, res)
     else:
-        cmd = "mkdir -p " + args.output
-        os.system(cmd)
-        reccursively_process(
-            args.input, args.output, stopwords, args.classifier, args.mode, args.regex)
+	cmd = "mkdir -p " + args.output
+	os.system(cmd)
+	reccursively_process(
+	    args.input, args.output, stopwords, args.classifier, args.mode, args.regex)
 # else:
 #     if args.volume:
 #         volume_path = get_volume_path(args.volume, args.path)

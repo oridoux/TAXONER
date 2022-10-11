@@ -9,7 +9,10 @@ parser = argparse.ArgumentParser(
     in the Corpus and prints the results")
 parser.add_argument("-m", "--mode",
                     help="chosen mode",
-                    choices=["CRI", "TAXREF"])
+                    choices=["LATIN", "TAXREF"])
+parser.add_argument(
+    "-o", "--output",
+    help="if providied, the results will be printed in this file")
 args = parser.parse_args()
 
 
@@ -60,12 +63,12 @@ def find_bound():
     d = r"F-measure = (?P<fm>\d+\.\d+)"
     results = re.compile(a+b+c+d, flags=re.DOTALL)
     stops_path = "Experiences/tmp_stopwords.txt"
-    if args.mode == "CRI":
+    if args.mode == "LATIN":
         classifier = "LATIN"
-        file_name = "evolution_latin.csv"
+        file_name = "analyses/evolution_latin.csv"
     elif args.mode == "TAXREF":
         classifier = "ABS3"
-        file_name = "evolution_TAXREF.csv"
+        file_name = "analyses/evolution_TAXREF.csv"
     else:
         exit("unexpected mode")
     cmd = f"python3 Experiences/score_corpus.py -o tmp -cl {classifier} -m A -s {stops_path} -vs calibration"
@@ -107,12 +110,15 @@ def find_bound():
                     return(stri, best_prec, best_rec, best_fm)
             os.system(f"rm {stops_path}")
             os.system("rm tmp")
-    print_curves(x, prec, rec, fme)
+    # print_curves(x, prec, rec, fme)
     return(stri, best_prec, best_rec, best_fm)
 
 
 i, prec, rec, fm = find_bound()
-print(f"started loosing in F-measure at {i}")
-print(f"best precision : {prec}")
-print(f"best recall : {rec}")
-print(f"best fm-measure : {fm}")
+results = f"stopped at {i} because the F-measure was too low\nbest precision : {prec}\nbest recall : {rec}\nbest fm-measure : {fm}"
+
+if args.output:
+    with open(args.output, "a") as out:
+        out.write(results)
+    else:
+        print(results)
