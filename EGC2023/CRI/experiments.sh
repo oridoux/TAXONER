@@ -1,15 +1,15 @@
 #!/bin/bash
 
 echo "première expérience TAXREF (avec abbréviations)"
-python3 Experiences/score_corpus.py -cl TAXREF  -m A -s Experiences/empty.txt
+python3 Experiences/score_corpus.py -cl TAXREF -m A -s Experiences/empty.txt
 echo "première expérience TAXREF (sans abbréviations)"
-python3 Experiences/score_corpus.py -cl TAXREF -m raw -s Experiences/empty.txt
+python3 Experiences/score_corpus.py -cl TAXREF -s Experiences/empty.txt
 
 # echo "expérience LINNAEUS"
 # python3 Experiences/score_corpus.py -cl LINNAEUS
 
 # echo "expérience Table 1 (results in Experiences/sondage29juilletXtaxref.txt)"
-python3 Experiences/taxref-modulo-distance
+python3 Experiences/taxref-modulo-distance.py
 
 # echo "expériences section 4.2"
 # for classifier in {"ABS7", "ABS5", "ABS3"}; do
