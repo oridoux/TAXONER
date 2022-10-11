@@ -376,7 +376,7 @@ def regex_of_spe(spe, adhoc=False, uc=False):
 
 
 def regex_of_gen(gen, lc=False):
-    s = f"{upper_case}{low_c}*"
+    s = f"{high_c}{low_c}*"
     if lc:
       s = "(" + s + f"|{low_c}+)"  
     return re.sub(r"@", s, gen)
