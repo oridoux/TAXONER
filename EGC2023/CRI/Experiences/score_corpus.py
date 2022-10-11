@@ -55,6 +55,9 @@ daytime = today.strftime("%B %d, %Y at %H:%M:%S")
 # of false positives, negatives and true positives
 # obtained processing the corpus
 def evaluation(corpus, exp, classifier, mode, expr, stopwords):
+    # print(f"{classifier = }")
+    # print(f"{mode = }")
+    # print(f"{stopwords = }")
     test_cpt = 0
     result = ""
     nfps = nfns = ntps = 0

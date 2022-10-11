@@ -50,7 +50,7 @@ def apply_matcher(stopwords, article, matcher, abbrev, context, size):
     return result
 
 
-def classify(article, classifier, stopwords, mode="raw", expr="", adhoc=False):
+def classify(article, classifier, stopwords, mode="Mm:A", expr="", adhoc=False):
     with open(article) as in_:
         text = in_.read()
     if classifier == "LATIN":
@@ -232,7 +232,7 @@ latin_matcher = False
 
 
 # evaluates the article according with the asked mode
-def classify_latin(article, stopwords, context=False, size=30, mode="raw"):
+def classify_latin(article, stopwords, context=False, size=30, mode=""):
     abbrev = re.search(r"A", mode)
 
     global latin_matcher
@@ -342,7 +342,8 @@ def compile_taxref(taxref_expr):
 taxref_matcher = False
 
 # evaluates the article according to the asked mode
-def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
+def classify_taxref(article, stopwords, context=False, size=30, mode=""):
+    # abbreviations are taken care of in the matcher
     abbrev = True if re.search(r"A", mode) else False
     # print(f"{abbrev = }")
     global taxref_matcher
@@ -352,6 +353,7 @@ def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
         # taxref_matcher = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
         taxref_matcher = compile_taxref(rf"{taxref_expr}")
     matcher = taxref_matcher
+    # abbreviation are disabled in apply_matcher
     return apply_matcher(stopwords, article, matcher, False, context, size)
 
 
@@ -361,15 +363,18 @@ def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
 low_c = "[éèêæœüöa-z]"
 high_c = "[ÆŒA-Z]"
 
-def etacnurt(word, width):  # truncate starting from the end
+# truncate starting from the end
+# replace the truncated part with @
+def etacnurt(word, width):  
     return (word if len(word) <= width else ("@" + word[-width:]))
 
 
 def regex_of_spe(spe, adhoc=False, uc=False):
     if adhoc and (spe[-1] == "i" or spe[-3:-1] == "sis"):
-        return re.sub(rf"@", "{high_c}{low_c}*(-{low_c})?", spe)
+        # is a genitive, possibly capitalized
+        return re.sub(rf"@", "{high_c}{low_c}*(-{low_c}+)?", spe)
     else:
-        s = f"{high_c}{low_c}*" if uc else f"{low_c}+(-{low_c})?"
+        s = f"{high_c}{low_c}*(-{low_c})?" if uc else f"{low_c}+(-{low_c})?"
         return re.sub(r"@", s, spe)
 
 
@@ -440,37 +445,27 @@ matcher_taxref_abs7 = False
 
 
 # evaluates the article according with the asked mode
-def classify_abstaxref(article, stopwords, context=False, size=30, classifier="abs3", mode="raw", adhoc=False):
+def classify_abstaxref(article, stopwords, context=False, size=30, classifier="ABS3", mode="", adhoc=False):
     abbrev = re.search(r"A", mode)
     MM = re.search(r"MM", mode)
     mm = re.search("mm", mode)
-    # if classifier == "accurate":
-    #     global matcher_abstaxref
-    #     if not matcher_abstaxref:
-    #         taxref_expr = get_taxref_expr("accurate")
-    #         matcher_abstaxref = compile_taxref(
-    #             rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
-    #         matcher = matcher_abstaxref
     if classifier == "ABS3":  # TAXREF abstrait suffixes de taille 3
         global matcher_taxref_abs3
         if not matcher_taxref_abs3:
             taxref_expr = get_abstaxref_expr(3, abbrev, MM, mm, adhoc)
-            matcher_taxref_abs3 = compile_taxref(
-                rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+            matcher_taxref_abs3 = compile_taxref(rf"{taxref_expr}")
         matcher = matcher_taxref_abs3
     elif classifier == "ABS5":  # TAXREF abstrait suffixes de taille 5
         global matcher_taxref_abs5
         if not matcher_taxref_abs5:
             taxref_expr = get_abstaxref_expr(5, abbrev, MM, mm, adhoc)
-            matcher_taxref_abs5 = compile_taxref(
-                rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+            matcher_taxref_abs5 = compile_taxref(rf"{taxref_expr}")
         matcher = matcher_taxref_abs5
     elif classifier == "ABS7":  # TAXREF abstrait suffixes de taille 7
         global matcher_taxref_abs7
         if not matcher_taxref_abs7:
             taxref_expr = get_abstaxref_expr(7, abbrev, MM, mm, adhoc)
-            matcher_taxref_abs7 = compile_taxref(
-                rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+            matcher_taxref_abs7 = compile_taxref(rf"{taxref_expr}")
         matcher = matcher_taxref_abs7
     else:
         # should not arrive but if the modes change will allow to see it quickly
@@ -585,7 +580,7 @@ def score(fps, fns, tps):
 #  and the chosen mode of recognition
 #  and return the effective matches the number of
 # true positives, false negatives and false positives
-def evaluate(article, name, expected, classifier, stopwords, mode=3, expr="", adhoc=False):
+def evaluate(article, name, expected, classifier, stopwords, mode, expr="", adhoc=False):
     (fps, fns, tps) = check(article, expected,
                             classifier, stopwords, mode, expr, adhoc=adhoc)
     (precision, recall, fm) = score(len(fps), len(fns), len(tps))
@@ -621,7 +616,7 @@ default_mode = "3"
 help_mode = '''R|\
 select one or several recognition modes: raw, A, Mm, MM, mm,
 and form a ':'-separated string of the selected modes'''
-mode_choices = ["raw", "A", "Mm", "MM", "mm", "mM"]  # range(1, 8)
+mode_choices = ["A", "Mm", "MM", "mm", "mM"]  # range(1, 8)
 # volumes_path = "archives_pretraitees/"
 volumes_path = "archives_pretraitees/"
 help_regex = "input a regex (path to a file with the regex on the first line) to be used as classifier"
