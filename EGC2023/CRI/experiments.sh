@@ -15,8 +15,9 @@ echo "expérience LINNAEUS"
 echo "# expérience LINNAEUS" >> $output_file
 python3 Experiences/score_corpus.py -o $output_file -cl LINNAEUS
 
-echo "expérience Table 1"
-# besoin du script
+echo "expérience Table 1 (results in analyses/sondage29juilletXtaxref.txt)"
+python3 Experiences/taxref-modulo-distance
+
 
 echo "expériences section 4.2"
 echo "# expériences section 4.2" >> $output_file
