@@ -256,32 +256,25 @@ def classify_latin(article, stopwords, context=False, size=30, mode="raw"):
 
 ######################### TAXREF BASED CLASSIFIER ##########################
 
-taxref_dir = "../../DATA"
-
-
 datapath = re.split(r'/', __file__)[:-3]
 datapath.append("DATA")
 
-taxref_dir = "/".join(datapath)
+taxref_path = "/".join(datapath)
 
 # print(f"{datapath = }")
 # print(f"{taxref_dir = }")
-
-
-
 
 def is_article(s):
     return s in {"du", "Du", "le", "Le", "d"}
 
 # returns a regex that matches binoms of the TAXREF base
-
-
 def get_taxref_expr(abbrev=False):
+    print(f"{abbrev = }")
+    
     before_taxref_build = time.time()
 
-    taxref = open(f"{taxref_dir}/taxref.out").read()
-    taxref_raw_lines = re.split(r'\n', re.sub(
-        r"\[.*\]|\(.*\)|\?|\"", "", taxref))
+    taxref = open(f"{taxref_path}/taxref.out").read()
+    taxref_raw_lines = re.split( r'\n', re.sub(r"\[.*\]|\(.*\)|\?|\"", "", taxref) )
     # print(f"{taxref_raw_lines = }")
 
     taxref_gen_spe = []
@@ -291,18 +284,15 @@ def get_taxref_expr(abbrev=False):
         # print(f"{line = }")
 
         # a few paticuliar cases
-        if line == "" or line[0] == "+" or " x " in line or " " not in line:
-            continue
+        if line == "" or line[0] == "+" or " x " in line or " " not in line: continue
         line_split = re.split(r' +', line)
         gen = line_split[0]
         spe = line_split[1]
-        if gen == "" or spe == "":
-            continue
+        if gen == "" or spe == "": continue
         if is_article(spe):
             if len(line_split) > 2:
                 spe = " ".join([spe, line_split[2]])
-            else:
-                continue
+            else: continue
 
         # Genius species litterally extracted from TAXREF
         if gen not in taxref_dic:
@@ -310,7 +300,7 @@ def get_taxref_expr(abbrev=False):
         else:
             taxref_dic[gen].add(spe)
 
-        # G. species extracted from TAXREF only if $abbrev
+        # G. species extracted from TAXREF only if abbrev
         if abbrev:
             g = gen[0] + r"\."
             if g not in taxref_dic:
@@ -349,16 +339,15 @@ def compile_taxref(taxref_expr):
     print(f"{taxref_compile_time_min = }")
     return matcher
 
-
 taxref_matcher = False
 
-
-# evaluates the article according with the asked mode
+# evaluates the article according to the asked mode
 def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
-    abbrev = re.search(r"A", mode)
-
+    abbrev = True if re.search(r"A", mode) else False
+    # print(f"{abbrev = }")
     global taxref_matcher
     if not taxref_matcher:
+        print("Compute matcher {abbrev}")
         taxref_expr = get_taxref_expr(abbrev)
         taxref_matcher = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
     matcher = taxref_matcher
@@ -369,7 +358,7 @@ def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
 
 
 low_c = "[éèêæœüöa-z]"
-
+high_c = "[ÆŒA-Z]"
 
 def etacnurt(word, width):  # truncate starting from the end
     return (word if len(word) <= width else ("@" + word[-width:]))
@@ -377,14 +366,14 @@ def etacnurt(word, width):  # truncate starting from the end
 
 def regex_of_spe(spe, adhoc=False, uc=False):
     if adhoc and (spe[-1] == "i" or spe[-3:-1] == "sis"):
-        return re.sub(r"@", "[ÆŒA-Z][éèêæœüöa-z]*(-[éèêæœüöa-z])?", spe)
+        return re.sub(rf"@", "{high_c}{low_c}*(-{low_c})?", spe)
     else:
-        s = f"{upper_case}{low_c}*" if uc else f"{low_c}+(-{low_c})?"
+        s = f"{high_c}{low_c}*" if uc else f"{low_c}+(-{low_c})?"
         return re.sub(r"@", s, spe)
 
 
 def regex_of_gen(gen, lc=False):
-    s = f"{low_c}+" if lc else f"{upper_case}{low_c}*"
+    s = f"{low_c}+" if lc else f"{high_c}{low_c}*"
     return re.sub(r"@", s, gen)
 
 
