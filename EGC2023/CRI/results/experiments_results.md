@@ -118,3 +118,32 @@ overall scores on the corpus Processed_corpus/vol155:
 	precision = 42.81 %
 	recall = 70.73 %
 	F-measure = 53.34 %
+# première expérience TAXREF (avec abbréviations)
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 12, 2022 at 01:31:15 with classifier TAXREF and mode A
+----------------------------------------------------------------------------------------------------------
+
+overall scores on the corpus Processed_corpus/vol155:
+	precision = 100.00 %
+	recall = 34.72 %
+	F-measure = 51.55 %
+
+overall scores on the corpus Processed_corpus/vol12:
+	precision = 100.00 %
+	recall = 13.89 %
+	F-measure = 24.39 %
+
+overall scores on the corpus Processed_corpus/vol83:
+	precision = 100.00 %
+	recall = 38.53 %
+	F-measure = 55.63 %
+
+overall scores on the corpus Processed_corpus/vol126:
+	precision = 100.00 %
+	recall = 38.89 %
+	F-measure = 56.00 %
+## overall scores on the whole corpus:
+	precision = 100.00 %
+	recall = 31.02 %
+	F-measure = 47.36 %
+# première expérience TAXREF (sans abbréviations)
