@@ -611,7 +611,7 @@ help_stopwords = f"if provided, the path to the stopwords file, else {stopwords_
 corpus_path = "Processed_corpus"
 expected_results_path = "Experiences/Expected_results_position"
 default_mode = "A"
-mode_choices = ["A", "Mm", "MM", "mm"] 
+mode_choices = ["raw", "A", "Mm", "MM", "mm"] 
 help_mode = '''R|\
 the chosen mode should be either 'raw' or  a ':'-separated string of the chosen modes from {mode_choices}
 if the argument is not provided, it is assumed that mode is {default_mode}
