@@ -343,9 +343,10 @@ def classify_taxref(article, stopwords, context=False, size=30, mode="raw"):
     # print(f"{abbrev = }")
     global taxref_matcher
     if not taxref_matcher:
-        print("Compute matcher {abbrev}")
+        print(f"Compute matcher {abbrev}")
         taxref_expr = get_taxref_expr(abbrev)
-        taxref_matcher = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+        # taxref_matcher = compile_taxref(rf"(?<=\W)({taxref_expr})(?!-)(?=\W)")
+        taxref_matcher = compile_taxref(rf"{taxref_expr}")
     matcher = taxref_matcher
     return apply_matcher(stopwords, article, matcher, False, context, size)
 
@@ -381,7 +382,7 @@ def regex_of_gen(gen, lc=False):
 def get_abstaxref_expr(abs_width=3, abbrev=False, MM=False, mm=False, adhoc=False):
     before_taxref_build = time.time()
 
-    taxref = open(f"{taxref_dir}/taxref.out").read()
+    taxref = open(f"{taxref_path}/taxref.out").read()
     taxref_raw_lines = re.split(r'\n', re.sub(
         r"\[.*\]|\(.*\)|\?|\"", "", taxref))
     taxref_dic = {}
