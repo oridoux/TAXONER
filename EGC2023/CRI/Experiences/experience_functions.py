@@ -434,9 +434,7 @@ def get_abstaxref_expr(abs_width=3, abbrev=False, MM=False, mm=False, adhoc=Fals
     return taxref_expr
 
 
-matcher_taxref_abs3 = False
-matcher_taxref_abs5 = False
-matcher_taxref_abs7 = False
+matcher_taxref_abs = [False, False, False, False, False, False, False, False]
 
 
 # evaluates the article according with the asked mode
@@ -444,24 +442,12 @@ def classify_abstaxref(article, stopwords, context=False, size=30, classifier="A
     abbrev = re.search(r"A", mode)
     MM = re.search(r"MM", mode)
     mm = re.search("mm", mode)
-    if classifier == "ABS3":  # TAXREF abstrait suffixes de taille 3
-        global matcher_taxref_abs3
-        if not matcher_taxref_abs3:
-            taxref_expr = get_abstaxref_expr(3, abbrev, MM, mm, adhoc)
-            matcher_taxref_abs3 = compile_taxref(rf"{taxref_expr}")
-        matcher = matcher_taxref_abs3
-    elif classifier == "ABS5":  # TAXREF abstrait suffixes de taille 5
-        global matcher_taxref_abs5
-        if not matcher_taxref_abs5:
-            taxref_expr = get_abstaxref_expr(5, abbrev, MM, mm, adhoc)
-            matcher_taxref_abs5 = compile_taxref(rf"{taxref_expr}")
-        matcher = matcher_taxref_abs5
-    elif classifier == "ABS7":  # TAXREF abstrait suffixes de taille 7
-        global matcher_taxref_abs7
-        if not matcher_taxref_abs7:
-            taxref_expr = get_abstaxref_expr(7, abbrev, MM, mm, adhoc)
-            matcher_taxref_abs7 = compile_taxref(rf"{taxref_expr}")
-        matcher = matcher_taxref_abs7
+    if classifier[:3] == "ABS" and (i := int(classifier[3])) <= 7:  # TAXREF abstrait suffixes de taille i
+        global matcher_taxref_abs
+        if not matcher_taxref_abs[i]:
+            taxref_expr = get_abstaxref_expr(i, abbrev, MM, mm, adhoc)
+            matcher_taxref_abs[i] = compile_taxref(rf"{taxref_expr}")
+        matcher = matcher_taxref_abs[i]
     else:
         # should not arrive but if the modes change will allow to see it quickly
         exit("unexpected mode")
@@ -625,7 +611,7 @@ default_regex = ""
 missing_regex_message = "user chose classifier INPUT and did not input a regex"
 help_classifier = "the classifier used, if INPUT is chosen, it is expected that the regex option is also used"
 classifier_choices = ["LATIN", "TAXREF",
-                      "ABS3", "ABS5", "ABS7", "LINNAEUS", "INPUT"]
+                      "ABS1", "ABS2", "ABS3", "ABS4", "ABS5", "ABS6", "ABS7", "LINNAEUS", "INPUT"]
 default_classifier = "LATIN"
 
 mode_opt = "|".join(mode_choices)
