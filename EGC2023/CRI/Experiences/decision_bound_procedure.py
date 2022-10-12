@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(
     in the Corpus and prints the results")
 parser.add_argument("-m", "--mode",
                     help="chosen mode",
-                    choices=["LATIN", "TAXREF"])
+                    choices=["LATIN", "TAXREF2", "TAXREF3"])
 parser.add_argument(
     "-o", "--output",
     help="if providied, the results will be printed in this file")
@@ -66,9 +66,9 @@ def find_bound():
     if args.mode == "LATIN":
         classifier = "LATIN"
         file_name = "analyses/evolution_latin.csv"
-    elif args.mode == "TAXREF":
-        classifier = "ABS3"
-        file_name = "analyses/evolution_TAXREF.csv"
+    elif args.mode[:-1] == "TAXREF":
+        classifier = "ABS" + args.mode[-1]
+        file_name = f"analyses/evolution_{args.mode}.csv"
     else:
         exit("unexpected mode")
     cmd = f"python3 Experiences/score_corpus.py -o tmp -cl {classifier} -m A -s {stops_path} -vs calibration"
@@ -120,5 +120,5 @@ results = f"stopped at {i} because the F-measure was too low\nbest precision : {
 if args.output:
     with open(args.output, "a") as out:
         out.write(results)
-    else:
-        print(results)
+else:
+    print(results)

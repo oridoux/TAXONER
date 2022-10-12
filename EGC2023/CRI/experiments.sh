@@ -40,9 +40,13 @@ echo "expériences figure 1 LATIN"
 echo "# expériences figure 1 LATIN" >> $output_file
 python3 Experiences/decision_bound_procedure.py -m CRI -o $output_file
 
-echo "expériences figure 1 TAXREF"
-echo "# expériences figure 1 TAXREF" >> $output_file
-python3 Experiences/decision_bound_procedure.py -m TAXREF -o $output_file
+echo "expériences figure 1 TAXREF rang 2"
+echo "# expériences figure 1 TAXREF rang 2" >> $output_file
+python3 Experiences/decision_bound_procedure.py -m TAXREF2 -o $output_file
+
+echo "expériences figure 1 TAXREF rang 3"
+echo "# expériences figure 1 TAXREF rang 3" >> $output_file
+python3 Experiences/decision_bound_procedure.py -m TAXREF3 -o $output_file
 echo "you can find the csv for the experiments in the analyses folder at evolution_latin.csv and evolution_TAXREF.csv" 
 
 echo "expériences table 2"
