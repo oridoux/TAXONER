@@ -1,391 +1,141 @@
-expériences table 2
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 12:16:31 with classifier TAXREF and mode raw
 ----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 37.00 %
-	F-measure = 54.02 %
+Experience launched on October 20, 2022 at 18:12:19 with classifier MIXi and mode A
+----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 30.21 %
-	F-measure = 46.40 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 33.82 %
-	F-measure = 50.55 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 12:25:07 with classifier TAXREF and mode A
-----------------------------------------------------------------------------------------------------------
+	precision = 96.17 %
+	recall = 61.11 %
+	F-measure = 74.73 %
 
 overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 39.14 %
-	F-measure = 56.26 %
+	precision = 89.95 %
+	recall = 60.24 %
+	F-measure = 72.16 %
+## overall scores on the whole corpus:
+	precision = 92.79 %
+	recall = 60.65 %
+	F-measure = 73.35 %
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 20, 2022 at 18:29:43 with classifier MIXi and mode A:MM
+----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 34.72 %
-	F-measure = 51.55 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 37.07 %
-	F-measure = 54.09 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 12:33:42 with classifier LATIN and mode A
-----------------------------------------------------------------------------------------------------------
+	precision = 92.04 %
+	recall = 64.24 %
+	F-measure = 75.66 %
 
 overall scores on the corpus Processed_corpus/vol83:
-	precision = 69.97 %
-	recall = 66.97 %
-	F-measure = 68.44 %
+	precision = 85.66 %
+	recall = 65.75 %
+	F-measure = 74.39 %
+## overall scores on the whole corpus:
+	precision = 88.50 %
+	recall = 65.04 %
+	F-measure = 74.98 %
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 20, 2022 at 18:42:01 with classifier MIXi and mode A:mm:MM
+----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
-	precision = 70.23 %
-	recall = 72.92 %
-	F-measure = 71.55 %
-## overall scores on the whole corpus:
-	precision = 70.10 %
-	recall = 69.76 %
-	F-measure = 69.93 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 12:37:01 with classifier ABS3 and mode A
-----------------------------------------------------------------------------------------------------------
+	precision = 80.95 %
+	recall = 64.93 %
+	F-measure = 72.06 %
 
 overall scores on the corpus Processed_corpus/vol83:
-	precision = 87.71 %
-	recall = 63.30 %
-	F-measure = 73.53 %
+	precision = 82.70 %
+	recall = 73.09 %
+	F-measure = 77.60 %
+## overall scores on the whole corpus:
+	precision = 81.92 %
+	recall = 69.27 %
+	F-measure = 75.07 %
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 20, 2022 at 20:16:03 with classifier MIXu and mode A
+----------------------------------------------------------------------------------------------------------
+
+overall scores on the corpus Processed_corpus/vol155:
+	precision = 76.04 %
+	recall = 76.04 %
+	F-measure = 76.04 %
+
+overall scores on the corpus Processed_corpus/vol83:
+	precision = 76.35 %
+	recall = 69.11 %
+	F-measure = 72.55 %
+## overall scores on the whole corpus:
+	precision = 76.20 %
+	recall = 72.36 %
+	F-measure = 74.23 %
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 20, 2022 at 20:19:20 with classifier MIXu and mode A:MM
+----------------------------------------------------------------------------------------------------------
+
+overall scores on the corpus Processed_corpus/vol155:
+	precision = 45.53 %
+	recall = 79.51 %
+	F-measure = 57.90 %
+
+overall scores on the corpus Processed_corpus/vol83:
+	precision = 36.66 %
+	recall = 78.59 %
+	F-measure = 50.00 %
+## overall scores on the whole corpus:
+	precision = 40.37 %
+	recall = 79.02 %
+	F-measure = 53.44 %
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 20, 2022 at 20:24:14 with classifier MIXu and mode A:mm:MM
+----------------------------------------------------------------------------------------------------------
+
+overall scores on the corpus Processed_corpus/vol155:
+	precision = 36.69 %
+	recall = 78.47 %
+	F-measure = 50.00 %
+
+overall scores on the corpus Processed_corpus/vol83:
+	precision = 35.18 %
+	recall = 85.63 %
+	F-measure = 49.87 %
+## overall scores on the whole corpus:
+	precision = 35.84 %
+	recall = 82.28 %
+	F-measure = 49.93 %
+# ----------------------------------------------------------------------------------------------------------
+Experience launched on October 20, 2022 at 21:47:34 with classifier ABS3 and mode A
+----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
 	precision = 93.27 %
 	recall = 67.36 %
 	F-measure = 78.23 %
-## overall scores on the whole corpus:
-	precision = 90.32 %
-	recall = 65.20 %
-	F-measure = 75.73 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 19:33:06 with classifier LATIN and mode A:MM
-----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol83:
-	precision = 62.82 %
-	recall = 74.92 %
-	F-measure = 68.34 %
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 64.24 %
-	recall = 76.74 %
-	F-measure = 69.94 %
+	precision = 88.14 %
+	recall = 63.61 %
+	F-measure = 73.89 %
 ## overall scores on the whole corpus:
-	precision = 63.49 %
-	recall = 75.77 %
-	F-measure = 69.09 %
+	precision = 90.54 %
+	recall = 65.37 %
+	F-measure = 75.92 %
 # ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 19:36:42 with classifier LATIN and mode A:mm:MM
+Experience launched on October 20, 2022 at 21:50:15 with classifier ABS3 and mode A:MM
 ----------------------------------------------------------------------------------------------------------
 
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 61.95 %
-	recall = 81.65 %
-	F-measure = 70.45 %
-
 overall scores on the corpus Processed_corpus/vol155:
-	precision = 59.84 %
-	recall = 77.08 %
-	F-measure = 67.37 %
-## overall scores on the whole corpus:
-	precision = 60.97 %
-	recall = 79.51 %
-	F-measure = 69.02 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 11, 2022 at 21:24:25 with classifier ABS3 and mode A:MM
-----------------------------------------------------------------------------------------------------------
+	precision = 50.25 %
+	recall = 70.14 %
+	F-measure = 58.55 %
 
 overall scores on the corpus Processed_corpus/vol83:
 	precision = 37.95 %
 	recall = 71.25 %
 	F-measure = 49.52 %
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 50.25 %
-	recall = 70.14 %
-	F-measure = 58.55 %
 ## overall scores on the whole corpus:
 	precision = 42.81 %
 	recall = 70.73 %
 	F-measure = 53.34 %
-# première expérience TAXREF (avec abbréviations)
 # ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 01:31:15 with classifier TAXREF and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 34.72 %
-	F-measure = 51.55 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 100.00 %
-	recall = 13.89 %
-	F-measure = 24.39 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 38.53 %
-	F-measure = 55.63 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 100.00 %
-	recall = 38.89 %
-	F-measure = 56.00 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 31.02 %
-	F-measure = 47.36 %
-# première expérience TAXREF (sans abbréviations)
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 01:52:29 with classifier TAXREF and mode raw
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 34.72 %
-	F-measure = 51.55 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 100.00 %
-	recall = 13.89 %
-	F-measure = 24.39 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 38.53 %
-	F-measure = 55.63 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 100.00 %
-	recall = 38.89 %
-	F-measure = 56.00 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 31.02 %
-	F-measure = 47.36 %
-# expérience LINNAEUS
-# expériences section 4.2
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 02:13:59 with classifier ABS7 and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 36.11 %
-	F-measure = 53.06 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 100.00 %
-	recall = 15.97 %
-	F-measure = 27.54 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 41.28 %
-	F-measure = 58.44 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 100.00 %
-	recall = 43.89 %
-	F-measure = 61.00 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 33.61 %
-	F-measure = 50.31 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 03:12:32 with classifier ABS5 and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 40.97 %
-	F-measure = 58.13 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 100.00 %
-	recall = 26.39 %
-	F-measure = 41.76 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 99.34 %
-	recall = 45.87 %
-	F-measure = 62.76 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 100.00 %
-	recall = 53.33 %
-	F-measure = 69.57 %
-## overall scores on the whole corpus:
-	precision = 99.77 %
-	recall = 40.63 %
-	F-measure = 57.74 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 03:48:14 with classifier ABS3 and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 40.29 %
-	recall = 67.71 %
-	F-measure = 50.52 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 31.63 %
-	recall = 51.74 %
-	F-measure = 39.26 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 32.76 %
-	recall = 63.61 %
-	F-measure = 43.24 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 22.66 %
-	recall = 64.44 %
-	F-measure = 33.53 %
-## overall scores on the whole corpus:
-	precision = 31.78 %
-	recall = 61.68 %
-	F-measure = 41.95 %
-expérience amélioration ad-hoc
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 03:52:07 with classifier ABS3 and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 66.67 %
-	recall = 61.11 %
-	F-measure = 63.77 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 65.49 %
-	recall = 51.39 %
-	F-measure = 57.59 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 52.96 %
-	recall = 63.00 %
-	F-measure = 57.54 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 54.21 %
-	recall = 64.44 %
-	F-measure = 58.88 %
-## overall scores on the whole corpus:
-	precision = 59.10 %
-	recall = 59.65 %
-	F-measure = 59.37 %
-expérience section 5
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 03:59:10 with classifier LATIN and mode A:MM:mm
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 2.51 %
-	recall = 79.17 %
-	F-measure = 4.86 %
-
-overall scores on the corpus Processed_corpus/vol12:
-	precision = 3.22 %
-	recall = 75.35 %
-	F-measure = 6.18 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 2.51 %
-	recall = 81.96 %
-	F-measure = 4.88 %
-
-overall scores on the corpus Processed_corpus/vol126:
-	precision = 1.58 %
-	recall = 80.00 %
-	F-measure = 3.09 %
-## overall scores on the whole corpus:
-	precision = 2.41 %
-	recall = 79.13 %
-	F-measure = 4.67 %
-# expériences figure 1 LATIN
-# expériences figure 1 TAXREF
-# expériences table 2
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 04:14:40 with classifier TAXREF and mode raw
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 30.21 %
-	F-measure = 46.40 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 37.00 %
-	F-measure = 54.02 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 33.82 %
-	F-measure = 50.55 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 04:21:37 with classifier TAXREF and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 100.00 %
-	recall = 34.72 %
-	F-measure = 51.55 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 100.00 %
-	recall = 39.14 %
-	F-measure = 56.26 %
-## overall scores on the whole corpus:
-	precision = 100.00 %
-	recall = 37.07 %
-	F-measure = 54.09 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 04:29:00 with classifier ABS3 and mode A
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 93.27 %
-	recall = 67.36 %
-	F-measure = 78.23 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 87.71 %
-	recall = 63.30 %
-	F-measure = 73.53 %
-## overall scores on the whole corpus:
-	precision = 90.32 %
-	recall = 65.20 %
-	F-measure = 75.73 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 04:31:36 with classifier ABS3 and mode A:MM
-----------------------------------------------------------------------------------------------------------
-
-overall scores on the corpus Processed_corpus/vol155:
-	precision = 50.25 %
-	recall = 70.14 %
-	F-measure = 58.55 %
-
-overall scores on the corpus Processed_corpus/vol83:
-	precision = 38.11 %
-	recall = 71.56 %
-	F-measure = 49.73 %
-## overall scores on the whole corpus:
-	precision = 42.91 %
-	recall = 70.89 %
-	F-measure = 53.46 %
-# ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 04:35:25 with classifier ABS3 and mode A:mm:MM
+Experience launched on October 20, 2022 at 21:54:15 with classifier ABS3 and mode A:mm:MM
 ----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
@@ -394,15 +144,15 @@ overall scores on the corpus Processed_corpus/vol155:
 	F-measure = 50.70 %
 
 overall scores on the corpus Processed_corpus/vol83:
-	precision = 36.84 %
-	recall = 79.20 %
-	F-measure = 50.29 %
+	precision = 36.70 %
+	recall = 78.90 %
+	F-measure = 50.10 %
 ## overall scores on the whole corpus:
-	precision = 38.12 %
-	recall = 74.63 %
-	F-measure = 50.47 %
+	precision = 38.04 %
+	recall = 74.47 %
+	F-measure = 50.36 %
 # ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 05:39:24 with classifier LATIN and mode A
+Experience launched on October 20, 2022 at 23:36:23 with classifier LATIN and mode A
 ----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
@@ -419,7 +169,7 @@ overall scores on the corpus Processed_corpus/vol83:
 	recall = 69.76 %
 	F-measure = 69.93 %
 # ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 05:40:48 with classifier LATIN and mode A:MM
+Experience launched on October 20, 2022 at 23:38:09 with classifier LATIN and mode A:MM
 ----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:
@@ -436,7 +186,7 @@ overall scores on the corpus Processed_corpus/vol83:
 	recall = 75.77 %
 	F-measure = 69.09 %
 # ----------------------------------------------------------------------------------------------------------
-Experience launched on October 12, 2022 at 05:42:26 with classifier LATIN and mode A:mm:MM
+Experience launched on October 20, 2022 at 23:40:20 with classifier LATIN and mode A:mm:MM
 ----------------------------------------------------------------------------------------------------------
 
 overall scores on the corpus Processed_corpus/vol155:

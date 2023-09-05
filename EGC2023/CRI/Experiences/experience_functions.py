@@ -57,6 +57,10 @@ def classify(article, classifier, stopwords, mode="Mm:A", expr="", adhoc=False):
         finds = classify_latin(text, stopwords, context=True, mode=mode)
     elif classifier == "TAXREF":
         finds = classify_taxref(text, stopwords, context=True, mode=mode)
+    elif classifier == "MIXu":
+        finds = classify_mixu(text, stopwords, context=True, mode=mode)
+    elif classifier == "MIXi":
+        finds = classify_mixi(text, stopwords, context=True, mode=mode)
     elif classifier[:3] == "ABS":
         finds = classify_abstaxref(
             text, stopwords, context=True, classifier=classifier, mode=mode, adhoc=adhoc)
@@ -478,6 +482,74 @@ def handle_user_regex(article, stopwords, expr, context=True, mode="raw", size=3
     matcher = user_regex
     return apply_matcher(stopwords, article, matcher, abbrev, context, size)
 
+def compile_mixu(mixu_expr):
+    before_mixu_compile = time.time()
+    matcher = re.compile(rf"(?<=\W)({mixu_expr})(?!-)(?=\W)")
+    after_mixu_compile = time.time()
+    mixu_compile_time_min = (after_mixu_compile - before_mixu_compile)/60
+    print(f"{mixu_compile_time_min = }")
+    return matcher
+
+mixu_matcher = False
+
+def classify_mixu(article, stopwords, context=False, size=30, mode="", adhoc=False):
+    abbrev = re.search(r"A", mode)
+    MM = re.search(r"MM", mode)
+    mm = re.search("mm", mode)
+    
+    global mixu_matcher
+    if not mixu_matcher:
+        latin_binom = get_latin_expr(tables_relachee(), ucword, lcword)
+        latin_expr = f"{latin_binom}"  # else ""
+        if MM:
+            latin_focused_maj_maj = get_latin_expr(
+                tables_restreintes(), ucword, ucword)
+            latin_expr = latin_expr + f"|{latin_focused_maj_maj}"  # else ""
+        if mm:
+            latin_focused_min_min = get_latin_expr(
+                tables_restreintes(), lcword, lcword)
+            latin_expr = latin_expr + f"|{latin_focused_min_min}"  # else ""
+        
+        taxref_expr = get_abstaxref_expr(3, abbrev, MM, mm, adhoc)
+        
+        mixu_matcher = compile_mixu(f"({latin_expr})|({taxref_expr})")
+    matcher = mixu_matcher
+    return apply_matcher(stopwords, article, matcher, False, context, size)
+
+def compile_mixi(mixi_expr):
+    before_mixi_compile = time.time()
+    matcher = re.compile(rf"(?<=\W)({mixi_expr})(?!-)(?=\W)")
+    after_mixi_compile = time.time()
+    mixi_compile_time_min = (after_mixi_compile - before_mixi_compile)/60
+    print(f"{mixi_compile_time_min = }")
+    return matcher
+
+mixi_matcher = False
+
+def classify_mixi(article, stopwords, context=False, size=30, mode="", adhoc=False):
+    abbrev = re.search(r"A", mode)
+    MM = re.search(r"MM", mode)
+    mm = re.search("mm", mode)
+    
+    global mixi_matcher
+    if not mixi_matcher:
+        latin_binom = get_latin_expr(tables_relachee(), ucword, lcword)
+        latin_expr = f"{latin_binom}"  # else ""
+        if MM:
+            latin_focused_maj_maj = get_latin_expr(
+                tables_restreintes(), ucword, ucword)
+            latin_expr = latin_expr + f"|{latin_focused_maj_maj}"  # else ""
+        if mm:
+            latin_focused_min_min = get_latin_expr(
+                tables_restreintes(), lcword, lcword)
+            latin_expr = latin_expr + f"|{latin_focused_min_min}"  # else ""
+        
+        taxref_expr = get_abstaxref_expr(3, abbrev, MM, mm, adhoc)
+        
+        mixi_matcher = compile_mixi(f"(?=({latin_expr}))({taxref_expr})")
+    matcher = mixi_matcher
+    return apply_matcher(stopwords, article, matcher, False, context, size)
+
 
 ################### MEASUREMENT TOOLS ##########################################@
 
@@ -610,7 +682,7 @@ help_regex = "input a regex (path to a file with the regex on the first line) to
 default_regex = ""
 missing_regex_message = "user chose classifier INPUT and did not input a regex"
 help_classifier = "the classifier used, if INPUT is chosen, it is expected that the regex option is also used"
-classifier_choices = ["LATIN", "TAXREF",
+classifier_choices = ["LATIN", "TAXREF", "MIXu", "MIXi",
                       "ABS1", "ABS2", "ABS3", "ABS4", "ABS5", "ABS6", "ABS7", "LINNAEUS", "INPUT"]
 default_classifier = "LATIN"
 
