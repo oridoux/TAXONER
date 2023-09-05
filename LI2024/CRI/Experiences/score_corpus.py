@@ -30,7 +30,7 @@ parser.add_argument(
 parser.add_argument("-t", "--Take_traps", type=int, default=1,
                     help="consider articles with no expected output when scoring")
 parser.add_argument("-cl", "--Classifier", default="CRI",
-                    choices=["CRI", "LINNAEUS", "SPECIES"],
+                    choices=["CRI", "LINNAEUS", "SPECIES", 'QUAESITOR'],
                     help="the classifier used")
 parser.add_argument("-r", "--regex", help=ex.help_regex,
                     default=ex.default_regex)

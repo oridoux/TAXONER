@@ -2,6 +2,7 @@ import regex as re
 import json
 import Levenshtein as le
 import os
+import sys
 import pandas as pd
 
 import argparse
@@ -224,11 +225,25 @@ def handle_species(article):
     return []
 
 
+def handle_quaesitor(article):
+    os.system(
+        f"~/node_modules/quaesitor-cli/dist/index.js -i {article} -o tmp")
+
+    with open('tmp', 'r') as output:
+        res = [(l.strip(), None) for l in output.readlines()]
+    os.system("rm -f tmp")
+    return res
+
+
 # given an article, the chosen mode of recognition and
 # the expected results for this article
 # returns the false positives, false negatives and true positives
 # when recognisiong with the mode mode
 def check(article, expected, classifier, stopwords, mode=3, expr=""):
+    founds = False
+    matches = []
+    print(article)
+    sys.stdout.flush()
     with open(article) as in_:
         text = in_.read()
     if classifier == "CRI":
@@ -237,24 +252,47 @@ def check(article, expected, classifier, stopwords, mode=3, expr=""):
         finds = handle_linnaeus(article)
     elif classifier == "SPECIES":
         finds = handle_species(article)
+    elif classifier == "QUAESITOR":
+        finds = handle_quaesitor(article)
+        # outputs from QUAESITOR are normalised + abbreviated binoms are developped if possible
+        # therefore we need to 'undo' this normalising step if we want to search for the position of a match
+        if finds != []:
+            finds = [re.sub(r'subsp\. ', '', f) for (f, _) in finds]
+            finds_abbrev = [(re.sub(r'subsp\. ', '', f), re.sub(
+                r'(\w)\w+', r'\1.', f, count=1)) for f in finds]
+            # we allow for some errors to counteract the normalisation with for instance '-' being removed
+            patterns = [rf'({f}|{a}' + '){e<=2}' for (f, a) in finds_abbrev]
+        else:
+            patterns = []
+        for p in patterns:
+            print(p)
+            # not pretty but should workaround this one example that I cannot really understand
+            if p == r"(Dès cos ⨉ sin|D. cos ⨉ sin){e<=2}":
+                m = re.search("D. sin x cos", text)
+            else:
+                m = re.search(p, text, flags=re.IGNORECASE | re.ENHANCEMATCH)
+            matches.append((m[0], m.start(), m.end()))
+        founds = True
     fps = []
     fns = []
     tps = []
     # get the positions in the original article of all matches
-    matches = []
-    prec_pos = 0
-    for n, _ in finds:
-        # escape the pattern so that Genus (subgenus) species is
-        # correctly recognized et the parentheses
-        p = re.escape(n)
-        m = re.search(p, text, pos=prec_pos)
-        # if the match is not in the rest of the article
-        # it must be that we are looking at the abreviated binoms
-        # so we have to start again from the beginning of the file
-        if not m:
-            m = re.search(p, text)
-        matches.append((m[0], m.start(), m.end()))
-        prec_pos = m.end()
+    if not founds:
+        prec_pos = 0
+        for n, _ in finds:
+            # escape the pattern so that Genus (subgenus) species is
+            # correctly recognized et the parentheses
+            p = re.escape(n)
+            m = re.search(p, text,
+                          pos=prec_pos)
+            # if the match is not in the rest of the article
+            # it must be that we are looking at the abreviated binoms
+            # so we have to start again from the beginning of the file
+            if not m:
+                m = re.search(p, text)
+            print(n)
+            matches.append((m[0], m.start(), m.end()))
+            prec_pos = m.end()
     # score using the positions of the matches
     # and no more using exact matches
     for (n, b, e) in matches:
@@ -264,7 +302,7 @@ def check(article, expected, classifier, stopwords, mode=3, expr=""):
         else:
             fps.append((n, b, e))
     for (m, b, e) in expected:
-        # if there does not exist a match that in included in the current expected binom
+        # if there does not exist a match that is included in the current expected binom
         if len(list(filter((lambda x: x[1] >= b and x[2] <= e), matches))) == 0:
             fns.append((m, b, e))
     # for tp in expected:
