@@ -217,6 +217,7 @@ def handle_linnaeus(article):
         f"java -jar linnaeus/bin/linnaeus-2.0.jar --text {article} --out tmp")
     df = pd.read_csv('tmp', delimiter='\t')
     res = df["text"].tolist()
+    res = [(i, None) for i in res]
     os.system("rm -f tmp")
     return res
 
@@ -242,14 +243,15 @@ def handle_quaesitor(article):
 def check(article, expected, classifier, stopwords, mode=3, expr=""):
     founds = False
     matches = []
-    print(article)
-    sys.stdout.flush()
+    #print(article)
+    #sys.stdout.flush()
     with open(article) as in_:
         text = in_.read()
     if classifier == "CRI":
         finds = classify(text, stopwords, context=True, mode=mode, expr=expr)
     elif classifier == "LINNAEUS":
         finds = handle_linnaeus(article)
+        # founds = True
     elif classifier == "SPECIES":
         finds = handle_species(article)
     elif classifier == "QUAESITOR":
@@ -265,7 +267,6 @@ def check(article, expected, classifier, stopwords, mode=3, expr=""):
         else:
             patterns = []
         for p in patterns:
-            print(p)
             # not pretty but should workaround this one example that I cannot really understand
             if p == r"(Dès cos ⨉ sin|D. cos ⨉ sin){e<=2}":
                 m = re.search("D. sin x cos", text)
@@ -290,7 +291,7 @@ def check(article, expected, classifier, stopwords, mode=3, expr=""):
             # so we have to start again from the beginning of the file
             if not m:
                 m = re.search(p, text)
-            print(n)
+            # print(n)
             matches.append((m[0], m.start(), m.end()))
             prec_pos = m.end()
     # score using the positions of the matches
@@ -370,7 +371,7 @@ stopwords_path = "Experiences/stopwords.txt"
 help_stopwords = f"if provided, the path to the stopwords file, else {stopwords_path}"
 corpus_path = "Processed_corpus"
 expected_results_path = "Experiences/Expected_results_position"
-default_mode = 1
+default_mode = 3
 help_mode = '''R|\
 choose the recognition mode:
     0: Inputed regex
